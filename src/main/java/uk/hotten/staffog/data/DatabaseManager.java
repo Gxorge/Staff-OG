@@ -2,6 +2,7 @@ package uk.hotten.staffog.data;
 
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Console;
 
 import java.sql.*;
@@ -24,8 +25,8 @@ public class DatabaseManager {
         database = plugin.getConfig().getString("sqlDatabase");
         port = plugin.getConfig().getInt("sqlPort");
 
-        checkPunishmentTable("staffog_bans");
-        checkPunishmentTable("staffog_mutes");
+        for (PunishType pt : PunishType.values()) checkPunishmentTable(pt.getTable());
+        checkNameHistoryTable();
     }
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
@@ -36,7 +37,7 @@ public class DatabaseManager {
     }
 
     private void checkPunishmentTable(String table) {
-        try(Connection connection = createConnection()) {
+        try (Connection connection = createConnection()) {
             DatabaseMetaData meta = connection.getMetaData();
             ResultSet resultSet = meta.getTables(null, null, table, new String[] {"TABLE"});
 
@@ -67,6 +68,35 @@ public class DatabaseManager {
 
         } catch (Exception e) {
             Console.error("Failed to check " + table + " table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkNameHistoryTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_history", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_history` (\n" +
+                    " `id` int NOT NULL AUTO_INCREMENT,\n" +
+                    " `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" +
+                    " `name` varchar(16) NOT NULL,\n" +
+                    " `uuid` varchar(36) NOT NULL,\n" +
+                    " PRIMARY KEY (`id`)\n" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_history' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check staffog_history table.");
             e.printStackTrace();
         }
     }
