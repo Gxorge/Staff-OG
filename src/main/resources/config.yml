@@ -1,0 +1,5 @@
+sqlHost: localhost
+sqlUsername: username
+sqlPassword: password
+sqlDatabase: staffog
+sqlPort: 3306

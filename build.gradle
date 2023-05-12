@@ -1,0 +1,79 @@
+plugins {
+    id "java"
+    id "java-library"
+    id "com.github.johnrengelman.shadow" version "7.1.2" // Import utility to package libraries into .jar file.
+}
+
+group = 'uk.hotten'
+version = '1.0-alpha'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+
+        content {
+            includeGroup 'org.bukkit'
+            includeGroup 'org.spigotmc'
+        }
+    }
+}
+
+
+
+dependencies {
+    api 'commons-io:commons-io:2.11.0'
+    api 'org.apache.commons:commons-pool2:2.11.1'
+    api 'mysql:mysql-connector-java:8.0.32'
+    compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+}
+
+tasks.register('updatePluginYmlVersion') {
+    doLast {
+        def file = file('src/main/resources/plugin.yml')
+        def lines = file.readLines()
+        lines[2] = "version: ${version}-" + getCurrentGitBranch()
+        file.write(lines.join("\n"))
+    }
+}
+
+def revertPluginYmlVersion() {
+    def file = file('src/main/resources/plugin.yml')
+    def lines = file.readLines()
+    lines[2] = "version: ${version}"
+    file.write(lines.join("\n"))
+}
+
+def getCurrentGitBranch() {
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (ignored) {
+        return 'unknown'
+    }
+}
+
+shadowJar {
+    minimize()
+    archiveClassifier.set(getCurrentGitBranch())
+    doLast {
+        revertPluginYmlVersion()
+    }
+}
+
+jar.dependsOn shadowJar
+
+compileJava {
+    options.compilerArgs += ["-parameters"]
+    options.fork = true
+    compileJava.options.encoding = 'UTF-8'
+}
+
+compileJava.dependsOn updatePluginYmlVersion

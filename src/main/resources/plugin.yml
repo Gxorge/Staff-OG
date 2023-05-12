@@ -1,0 +1,12 @@
+name: Staff-OG
+main: uk.hotten.staffog.StaffOGPlugin
+version: 1.0-alpha
+api-version: 1.18
+author: Gxorge
+description: Punishment system for TrueOG.
+
+commands:
+  permban:
+    description: Permanently ban a player.
+    permission: staffog.command.permban
+    usage: /<command> <player> <reason>
