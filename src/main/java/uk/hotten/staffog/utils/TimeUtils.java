@@ -1,9 +1,13 @@
 package uk.hotten.staffog.utils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class TimeUtils {
+
+    public static DateFormat notificationTimeFormat = new SimpleDateFormat("dd-MM-yy");
 
     public static String formatMillisecondTime(long millis) {
         if (millis == -1)

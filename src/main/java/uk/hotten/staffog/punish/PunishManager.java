@@ -14,6 +14,7 @@ import uk.hotten.staffog.utils.TimeUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Date;
 import java.util.UUID;
 
 public class PunishManager {
@@ -122,10 +123,7 @@ public class PunishManager {
                 }
             }
 
-            Message.staffBroadcast(Message.format(entry.getName() + ChatColor.RED + " has been " +
-                    entry.getType().getBroadcastMessage() + " for " +
-                    ChatColor.WHITE + duration + ChatColor.RED +
-                    " by " + ChatColor.WHITE + entry.getByName()));
+            Message.staffBroadcast(Message.formatNotification("New " + entry.getType().toString().toLowerCase() + ": targeting user " + entry.getName() + " until " + entry.calculateUntilDate()));
 
         } catch (Exception e) {
             Console.error("Failed to create punishment.");
@@ -205,9 +203,7 @@ public class PunishManager {
                 Bukkit.getServer().getPlayer(entry.getUuid()).sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted!"));
             }
 
-            Message.staffBroadcast(Message.format(entry.getName() + ChatColor.GREEN + " has been un" +
-                    entry.getType().getBroadcastMessage() + " by "
-                    + ChatColor.WHITE + entry.getRemovedName()));
+            Message.staffBroadcast(Message.formatNotification("Un" + entry.getType().toString().toLowerCase() + ": targeting user " + entry.getName()));
 
         } catch (Exception e) {
             Console.error("Failed to remove punishment.");

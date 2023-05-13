@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
 import uk.hotten.staffog.utils.Console;
+import uk.hotten.staffog.utils.TimeUtils;
 
 import java.time.Duration;
 import java.util.*;
@@ -56,5 +57,13 @@ public class PunishEntry {
             return false;
 
         return (calculateRemaining() <= 0);
+    }
+
+    public String calculateUntilDate() {
+        if (until == -1)
+            return "forever";
+
+        Date date = new Date(until);
+        return TimeUtils.notificationTimeFormat.format(date);
     }
 }
