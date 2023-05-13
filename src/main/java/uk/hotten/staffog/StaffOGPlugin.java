@@ -1,7 +1,8 @@
 package uk.hotten.staffog;
 
 import org.bukkit.plugin.java.JavaPlugin;
-import uk.hotten.staffog.commands.PermBanCommand;
+import uk.hotten.staffog.commands.PermPunishCommand;
+import uk.hotten.staffog.commands.UnpunishCommand;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.utils.Console;
@@ -17,7 +18,10 @@ public class StaffOGPlugin extends JavaPlugin {
         DatabaseManager databaseManager = new DatabaseManager(this);
         PunishManager punishManager = new PunishManager(this);
 
-        getCommand("permban").setExecutor(new PermBanCommand());
+        getCommand("permban").setExecutor(new PermPunishCommand());
+        getCommand("unban").setExecutor(new UnpunishCommand());
+        getCommand("permmute").setExecutor(new PermPunishCommand());
+        getCommand("unmute").setExecutor(new UnpunishCommand());
 
         Console.info("Staff-OG is ready!");
     }

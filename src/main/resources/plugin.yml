@@ -10,3 +10,18 @@ commands:
     description: Permanently ban a player.
     permission: staffog.command.permban
     usage: /<command> <player> <reason>
+
+  unban:
+    description: Unban a player.
+    permission: staffog.command.unban
+    usage: /<command> <player>
+
+  permmute:
+    description: Permanently mute a player.
+    permission: staffog.command.permmute
+    usage: /<command> <player> <reason>
+
+  unmute:
+    description: Unmute a player.
+    permission: staffog.command.unmute
+    usage: /<command> <player>

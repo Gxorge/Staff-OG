@@ -50,15 +50,16 @@ public class DatabaseManager {
             Statement statement = connection.createStatement();
 
             String sql = "CREATE TABLE `" + table + "` (" +
-                    " `id` bigint NOT NULL AUTO_INCREMENT," +
+                    " `id` bigint(20) NOT NULL AUTO_INCREMENT," +
                     " `uuid` varchar(36) NOT NULL," +
                     " `reason` varchar(2048) NOT NULL," +
                     " `by_uuid` varchar(36) DEFAULT NULL," +
                     " `by_name` varchar(128) DEFAULT NULL," +
                     " `removed_uuid` varchar(36) DEFAULT NULL," +
                     " `removed_name` varchar(128) DEFAULT NULL," +
-                    " `time` bigint NOT NULL," +
-                    " `until` bigint NOT NULL," +
+                    " `removed_time` bigint(20) DEFAULT NULL," +
+                    " `time` bigint(20) NOT NULL," +
+                    " `until` bigint(20) NOT NULL," +
                     " `active` bit(1) NOT NULL," +
                     " PRIMARY KEY (`id`)" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
@@ -84,12 +85,12 @@ public class DatabaseManager {
             // Table does not exist
             Statement statement = connection.createStatement();
 
-            String sql = "CREATE TABLE `staffog_history` (\n" +
-                    " `id` int NOT NULL AUTO_INCREMENT,\n" +
-                    " `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" +
-                    " `name` varchar(16) NOT NULL,\n" +
-                    " `uuid` varchar(36) NOT NULL,\n" +
-                    " PRIMARY KEY (`id`)\n" +
+            String sql = "CREATE TABLE `staffog_history` (" +
+                    " `id` int NOT NULL AUTO_INCREMENT," +
+                    " `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP," +
+                    " `name` varchar(16) NOT NULL," +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " PRIMARY KEY (`id`)" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
             statement.executeUpdate(sql);

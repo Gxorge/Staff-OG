@@ -1,6 +1,7 @@
 package uk.hotten.staffog.punish;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.staffog.data.DatabaseManager;
@@ -75,7 +76,7 @@ public class PunishManager {
     public UUID getUUIDFromName(String name) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT `uuid` FROM `staffog_history` WHERE `name`=? ORDER BY `id`");
+            PreparedStatement statement = connection.prepareStatement("SELECT `uuid` FROM `staffog_history` WHERE `name`=? ORDER BY `id` DESC LIMIT 1");
             statement.setString(1, name);
 
             ResultSet rs = statement.executeQuery();
@@ -153,6 +154,11 @@ public class PunishManager {
             entry.setUntil(rs.getLong("until"));
             entry.setActive(rs.getInt("active") == 1);
 
+            if (entry.checkDurationOver()) {
+                expirePunishment(entry);
+                return null;
+            }
+
             return entry;
 
 
@@ -163,7 +169,49 @@ public class PunishManager {
         }
     }
 
-    public void removePunishment(int id, String removedUuid, String removedName) {
+    public void expirePunishment(PunishEntry entry) {
+        entry.setRemovedUuid("Expired");
+        entry.setRemovedName("Expired");
+        entry.setActive(false);
+        removePunishment(entry);
+    }
 
+    public void removePunishment(PunishEntry entry) {
+        entry.setActive(false);
+        entry.setRemovedTime(System.currentTimeMillis());
+
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+            if (entry.getName() == null)
+                entry.setName(getNameFromUUID(entry.getUuid()));
+
+            PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE `" + entry.getType().getTable() + "` SET `removed_uuid`=?, `removed_name`=?, `removed_time`=?, `active`=? WHERE `id`=?"
+            );
+
+            statement.setString(1, entry.getRemovedUuid());
+            statement.setString(2, entry.getRemovedName());
+            statement.setLong(3, entry.getRemovedTime());
+            statement.setInt(4, 0);
+            statement.setInt(5, entry.getId());
+
+            statement.executeUpdate();
+
+            String duration = TimeUtils.formatMillisecondTime(entry.calculateDuration());
+            if (entry.getPlayer() != null && entry.getPlayer().isOnline() && entry.getType() == PunishType.MUTE) {
+                entry.getPlayer().sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted."));
+            }
+
+            if (entry.getType() == PunishType.MUTE && Bukkit.getServer().getPlayer(entry.getUuid()) != null) {
+                Bukkit.getServer().getPlayer(entry.getUuid()).sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted!"));
+            }
+
+            Message.staffBroadcast(Message.format(entry.getName() + ChatColor.GREEN + " has been un" +
+                    entry.getType().getBroadcastMessage() + " by "
+                    + ChatColor.WHITE + entry.getRemovedName()));
+
+        } catch (Exception e) {
+            Console.error("Failed to remove punishment.");
+            e.printStackTrace();
+        }
     }
 }

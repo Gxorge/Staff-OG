@@ -26,6 +26,7 @@ public class PunishEntry {
 
     @Getter @Setter private String removedUuid;
     @Getter @Setter private String removedName;
+    @Getter @Setter private long removedTime;
 
     @Getter @Setter private long time;
     @Getter @Setter private long until;
@@ -47,7 +48,6 @@ public class PunishEntry {
         if (until == -1)
             return -1;
 
-        Console.info("" + until);
         return until - System.currentTimeMillis();
     }
 

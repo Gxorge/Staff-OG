@@ -11,29 +11,46 @@ import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Message;
+import uk.hotten.staffog.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class PermBanCommand implements CommandExecutor {
+public class PermPunishCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (args == null || args.length < 2) {
-            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /permban <name> <reason>"));
+            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /" + label + " <player> <reason>"));
+            return true;
+        }
+
+        PunishType commandType;
+        if (label.toLowerCase().equals("permban"))
+            commandType = PunishType.BAN;
+        else if (label.toLowerCase().equals("permmute"))
+            commandType = PunishType.MUTE;
+        else {
+            sender.sendMessage(Message.format(ChatColor.RED + "Unsupported type for command."));
             return true;
         }
 
         UUID uuid = PunishManager.getInstance().getUUIDFromName(args[0]);
         if (uuid == null) {
-            sender.sendMessage(Message.format(args[0] + " has never joined the server!"));
+            sender.sendMessage(Message.format(ChatColor.RED + args[0] + " has never joined the server!"));
+            return true;
+        }
+
+        PunishEntry isPunished = PunishManager.getInstance().checkActivePunishment(commandType, uuid);
+        if (isPunished != null) {
+            sender.sendMessage(Message.format(ChatColor.RED + args[0] + " is already " + commandType.getBroadcastMessage() + " for " + TimeUtils.formatMillisecondTime(isPunished.calculateRemaining())) + ".");
             return true;
         }
 
         OfflinePlayer player = Bukkit.getServer().getOfflinePlayer(uuid);
 
-        PunishEntry entry = new PunishEntry(PunishType.BAN);
+        PunishEntry entry = new PunishEntry(commandType);
 
         entry.setUuid(uuid);
         entry.setName(player.getName());
