@@ -1,49 +1,60 @@
 package uk.hotten.staffog.punish.data;
 
 import lombok.Getter;
+import lombok.Setter;
+import org.bukkit.entity.Player;
+import uk.hotten.staffog.utils.Console;
 
-import java.util.UUID;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class PunishEntry {
 
-    @Getter private PunishType type;
+    // None DB data
+    @Getter @Setter private PunishType type;
+    @Getter @Setter private Player player;
+    @Getter @Setter private String name;
 
-    @Getter private UUID uuid;
-    @Getter private String reason;
+    // Data stored in DB
+    @Getter @Setter private int id;
+    @Getter @Setter private UUID uuid;
+    @Getter @Setter private String reason;
 
-    @Getter private UUID byUuid;
-    @Getter private String byName;
+    @Getter @Setter private String byUuid;
+    @Getter @Setter private String byName;
 
-    @Getter private UUID removedUuid;
-    @Getter private String removedName;
+    @Getter @Setter private String removedUuid;
+    @Getter @Setter private String removedName;
 
-    @Getter private int time;
-    @Getter private int until;
+    @Getter @Setter private long time;
+    @Getter @Setter private long until;
 
-    @Getter private boolean active;
+    @Getter @Setter private boolean active;
 
-    public PunishEntry(PunishType type, UUID uuid, String reason, UUID byUuid, String byName, int time, int until, boolean active) {
+    public PunishEntry(PunishType type) {
         this.type = type;
-        this.uuid = uuid;
-        this.reason = reason;
-        this.byUuid = byUuid;
-        this.byName = byName;
-        this.time = time;
-        this.until = until;
-        this.active = active;
     }
 
-    public PunishEntry(PunishType type, UUID uuid, String reason, UUID byUuid, String byName, UUID removedUuid, String removedName, int time, int until, boolean active) {
-        this.type = type;
-        this.uuid = uuid;
-        this.reason = reason;
-        this.byUuid = byUuid;
-        this.byName = byName;
-        this.removedUuid = removedUuid;
-        this.removedName = reason;
-        this.time = time;
-        this.until = until;
-        this.active = active;
+    public long calculateDuration() {
+        if (until == -1)
+            return -1;
+
+        return until - time;
     }
 
+    public long calculateRemaining() {
+        if (until == -1)
+            return -1;
+
+        Console.info("" + until);
+        return until - System.currentTimeMillis();
+    }
+
+    public boolean checkDurationOver() {
+        if (until == -1)
+            return false;
+
+        return (calculateRemaining() <= 0);
+    }
 }

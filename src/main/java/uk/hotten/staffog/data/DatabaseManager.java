@@ -31,8 +31,8 @@ public class DatabaseManager {
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
         synchronized (this) {
-            Class.forName("com.mysql.jdbc.Driver");
-            return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?userSSL=false", username, password);
+            Class.forName("org.mariadb.jdbc.Driver");
+            return DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database + "?userSSL=false", username, password);
         }
     }
 
