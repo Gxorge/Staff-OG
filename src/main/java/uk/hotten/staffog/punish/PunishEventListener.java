@@ -26,7 +26,10 @@ public class PunishEventListener implements Listener {
             return;
 
         event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_BANNED);
-        event.setKickMessage(ChatColor.RED + "You are banned for " + TimeUtils.formatMillisecondTime(entry.calculateRemaining()) + "\nReason: " + ChatColor.WHITE + entry.getReason());
+        event.setKickMessage(ChatColor.RED + "You have been banned for: \n" +
+                ChatColor.WHITE + entry.getReason() + "\n\n" +
+                ChatColor.RED + "Your ban " + (entry.getUntil() == -1 ? "does not expire." : "will expire in:\n"
+                + ChatColor.WHITE + TimeUtils.formatMillisecondTime(entry.calculateRemaining())));
     }
 
     @EventHandler
@@ -37,8 +40,9 @@ public class PunishEventListener implements Listener {
             return;
 
         event.setCancelled(true);
-        event.getPlayer().sendMessage(Message.format(ChatColor.RED + "You are muted for " + TimeUtils.formatMillisecondTime(entry.calculateRemaining())));
-        event.getPlayer().sendMessage(Message.format(ChatColor.RED + "Reason: " + ChatColor.WHITE + entry.getReason()));
+        event.getPlayer().sendMessage(Message.format(ChatColor.RED + "You have been muted for " + ChatColor.WHITE + entry.getReason()));
+        event.getPlayer().sendMessage(Message.format(ChatColor.RED + "Your mute " + (entry.getUntil() == -1 ? "does not expire." : "will expire in: "
+                + ChatColor.WHITE + TimeUtils.formatMillisecondTime(entry.calculateRemaining()))));
     }
 
 }

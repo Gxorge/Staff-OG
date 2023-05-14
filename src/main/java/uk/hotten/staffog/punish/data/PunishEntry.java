@@ -3,12 +3,9 @@ package uk.hotten.staffog.punish.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
-import uk.hotten.staffog.utils.Console;
 import uk.hotten.staffog.utils.TimeUtils;
 
-import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 public class PunishEntry {
 
@@ -18,7 +15,7 @@ public class PunishEntry {
     @Getter @Setter private String name;
 
     // Data stored in DB
-    @Getter @Setter private int id;
+    @Getter @Setter private long id;
     @Getter @Setter private UUID uuid;
     @Getter @Setter private String reason;
 
@@ -27,6 +24,7 @@ public class PunishEntry {
 
     @Getter @Setter private String removedUuid;
     @Getter @Setter private String removedName;
+    @Getter @Setter private String removedReason;
     @Getter @Setter private long removedTime;
 
     @Getter @Setter private long time;

@@ -26,6 +26,7 @@ public class DatabaseManager {
         port = plugin.getConfig().getInt("sqlPort");
 
         for (PunishType pt : PunishType.values()) checkPunishmentTable(pt.getTable());
+        checkKickTable();
         checkNameHistoryTable();
     }
 
@@ -57,6 +58,7 @@ public class DatabaseManager {
                     " `by_name` varchar(128) DEFAULT NULL," +
                     " `removed_uuid` varchar(36) DEFAULT NULL," +
                     " `removed_name` varchar(128) DEFAULT NULL," +
+                    " `removed_reason` varchar(2048) DEFAULT NULL," +
                     " `removed_time` bigint(20) DEFAULT NULL," +
                     " `time` bigint(20) NOT NULL," +
                     " `until` bigint(20) NOT NULL," +
@@ -69,6 +71,37 @@ public class DatabaseManager {
 
         } catch (Exception e) {
             Console.error("Failed to check " + table + " table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkKickTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_kick", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_kick` (" +
+                    " `id` bigint(20) NOT NULL AUTO_INCREMENT," +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " `reason` varchar(2048) NOT NULL," +
+                    " `by_uuid` varchar(36) NOT NULL," +
+                    " `by_name` varchar(128) NOT NULL," +
+                    " `time` bigint(20) NOT NULL," +
+                    " PRIMARY KEY (`id`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_kick' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check staffog_kick table.");
             e.printStackTrace();
         }
     }
@@ -101,5 +134,4 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-
 }

@@ -10,14 +10,16 @@ import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Message;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class UnpunishCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args == null || args.length == 0) {
-            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /" + label + " <player>"));
+        if (args == null || args.length < 2) {
+            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /" + label + " <player> <reason>"));
             return true;
         }
 
@@ -45,6 +47,11 @@ public class UnpunishCommand implements CommandExecutor {
 
         entry.setRemovedUuid((sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "Console");
         entry.setRemovedName((sender instanceof Player) ? ((Player) sender).getName() : "Console");
+
+        ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
+        preReason.remove(0);
+        String reason = String.join(" ", preReason);
+        entry.setRemovedReason(reason);
 
         PunishManager.getInstance().removePunishment(entry);
         return true;

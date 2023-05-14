@@ -9,8 +9,8 @@ public class Message {
         return "" + ChatColor.GRAY + "[" + ChatColor.YELLOW + "Staff-OG" + ChatColor.GRAY + "] " + ChatColor.RESET + message;
     }
 
-    public static String formatNotification(String message) {
-        return "" + ChatColor.RED + "STAFF | " + ChatColor.AQUA + "Notification " + ChatColor.DARK_GRAY + "> " + ChatColor.RESET + message;
+    public static String formatNotification(String prefix, String message) {
+        return "" + ChatColor.RED + prefix.toUpperCase() + " | " + ChatColor.AQUA + "Notification " + ChatColor.DARK_GRAY + "> " + ChatColor.RESET + message;
     }
 
     public static void staffBroadcast(String message) {

@@ -1,5 +1,6 @@
 package uk.hotten.staffog.commands;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -15,21 +16,60 @@ import uk.hotten.staffog.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.UUID;
 
-public class PermPunishCommand implements CommandExecutor {
+public class TempPunishCommand implements CommandExecutor {
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args == null || args.length < 2) {
-            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /" + label + " <player> <reason>"));
+        if (args == null || args.length < 4) {
+            sender.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /" + label + " <player> <unit> <amount> <reason>"));
             return true;
         }
 
+        int amount;
+        try {
+            amount = Integer.parseInt(args[2]);
+        } catch (Exception e) {
+            sender.sendMessage(Message.format(Message.format(ChatColor.RED + "The amount of units must be a number!")));
+            return true;
+        }
+
+        Date currentTime = new Date(System.currentTimeMillis());
+        long untilTime;
+        switch (args[1].toLowerCase()) {
+            case "d": {
+                untilTime = DateUtils.addDays(currentTime, amount).getTime();
+                break;
+            }
+
+            case "w": {
+                untilTime = DateUtils.addWeeks(currentTime, amount).getTime();
+                break;
+            }
+
+            case "m": {
+                untilTime = DateUtils.addMonths(currentTime, amount).getTime();
+                break;
+            }
+
+            case "y": {
+                untilTime = DateUtils.addYears(currentTime, amount).getTime();
+                break;
+            }
+
+            default: {
+                sender.sendMessage(Message.format(ChatColor.RED + "Invalid time unit, please supply: (d)ay, (w)eek, (m)onth or (y)ear."));
+                return true;
+            }
+        }
+
         PunishType commandType;
-        if (label.toLowerCase().equals("permban"))
+        if (label.toLowerCase().equals("tempban"))
             commandType = PunishType.BAN;
-        else if (label.toLowerCase().equals("permmute"))
+        else if (label.toLowerCase().equals("tempmute"))
             commandType = PunishType.MUTE;
         else {
             sender.sendMessage(Message.format(ChatColor.RED + "Unsupported type for command."));
@@ -58,11 +98,13 @@ public class PermPunishCommand implements CommandExecutor {
             entry.setPlayer(player.getPlayer());
         entry.setByUuid((sender instanceof Player) ? ((Player) sender).getUniqueId().toString() : "NCP");
         entry.setByName((sender instanceof Player) ? ((Player) sender).getName() : "NCP");
-        entry.setTime(System.currentTimeMillis());
-        entry.setUntil(-1);
+        entry.setTime(currentTime.getTime());
+        entry.setUntil(untilTime);
         entry.setActive(true);
 
         ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
+        preReason.remove(0);
+        preReason.remove(0);
         preReason.remove(0);
         String reason = String.join(" ", preReason);
         entry.setReason(reason);

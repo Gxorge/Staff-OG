@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.staffog.data.DatabaseManager;
+import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Console;
@@ -114,16 +115,24 @@ public class PunishManager {
             if (entry.getPlayer() != null && entry.getPlayer().isOnline()) {
                 switch (entry.getType()) {
                     case BAN -> {
-                        entry.getPlayer().kickPlayer(ChatColor.RED + "You have been banned for " + duration + "\nReason: " + ChatColor.WHITE + entry.getReason());
+                        entry.getPlayer().kickPlayer(ChatColor.RED + "You have been banned for:\n" +
+                                ChatColor.WHITE + entry.getReason() + "\n\n" +
+                                ChatColor.RED + "Your ban " + (entry.getUntil() == -1 ? "does not expire." : "will expire in: \n"
+                                + ChatColor.WHITE + duration));
                     }
                     case MUTE -> {
-                        entry.getPlayer().sendMessage(Message.format(ChatColor.RED + "You have been muted for " + duration));
-                        entry.getPlayer().sendMessage(Message.format(ChatColor.RED + "Reason: " + ChatColor.WHITE + entry.getReason()));
+                        entry.getPlayer().sendMessage(Message.format(ChatColor.RED + "You have been muted for " + ChatColor.WHITE + entry.getReason()));
+                        entry.getPlayer().sendMessage(Message.format(ChatColor.RED + "Your mute " + (entry.getUntil() == -1 ? "does not expire." : "will expire in: \n"
+                                + ChatColor.WHITE + duration)));
                     }
                 }
             }
 
-            Message.staffBroadcast(Message.formatNotification("New " + entry.getType().toString().toLowerCase() + ": targeting user " + entry.getName() + " until " + entry.calculateUntilDate()));
+            Bukkit.getServer().broadcastMessage(Message.formatNotification(
+                    entry.getType().toString(),
+                    "New " + entry.getType().toString().toLowerCase()
+                            + " on " + entry.getName() + " for "
+                            + duration + " by " + entry.getByName()));
 
         } catch (Exception e) {
             Console.error("Failed to create punishment.");
@@ -143,7 +152,7 @@ public class PunishManager {
                 return null;
 
             PunishEntry entry = new PunishEntry(type);
-            entry.setId(rs.getInt("id"));
+            entry.setId(rs.getLong("id"));
             entry.setUuid(uuid);
             entry.setReason(rs.getString("reason"));
             entry.setByUuid(rs.getString("by_uuid"));
@@ -170,6 +179,7 @@ public class PunishManager {
     public void expirePunishment(PunishEntry entry) {
         entry.setRemovedUuid("Expired");
         entry.setRemovedName("Expired");
+        entry.setRemovedReason("Punishment Expired");
         entry.setActive(false);
         removePunishment(entry);
     }
@@ -183,30 +193,58 @@ public class PunishManager {
                 entry.setName(getNameFromUUID(entry.getUuid()));
 
             PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE `" + entry.getType().getTable() + "` SET `removed_uuid`=?, `removed_name`=?, `removed_time`=?, `active`=? WHERE `id`=?"
+                    "UPDATE `" + entry.getType().getTable() + "` SET `removed_uuid`=?, `removed_name`=?, `removed_reason`=?, `removed_time`=?, `active`=? WHERE `id`=?"
             );
 
             statement.setString(1, entry.getRemovedUuid());
             statement.setString(2, entry.getRemovedName());
-            statement.setLong(3, entry.getRemovedTime());
-            statement.setInt(4, 0);
-            statement.setInt(5, entry.getId());
+            statement.setString(3, entry.getRemovedReason());
+            statement.setLong(4, entry.getRemovedTime());
+            statement.setInt(5, 0);
+            statement.setLong(6, entry.getId());
 
             statement.executeUpdate();
 
             String duration = TimeUtils.formatMillisecondTime(entry.calculateDuration());
-            if (entry.getPlayer() != null && entry.getPlayer().isOnline() && entry.getType() == PunishType.MUTE) {
-                entry.getPlayer().sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted."));
-            }
-
             if (entry.getType() == PunishType.MUTE && Bukkit.getServer().getPlayer(entry.getUuid()) != null) {
-                Bukkit.getServer().getPlayer(entry.getUuid()).sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted!"));
+                Bukkit.getServer().getPlayer(entry.getUuid()).sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted."));
             }
 
-            Message.staffBroadcast(Message.formatNotification("Un" + entry.getType().toString().toLowerCase() + ": targeting user " + entry.getName()));
+            Message.staffBroadcast(Message.formatNotification("UN" + entry.getType(), entry.getName() + " has been un" + entry.getType().getBroadcastMessage() + " by " + entry.getRemovedName()));
 
         } catch (Exception e) {
             Console.error("Failed to remove punishment.");
+            e.printStackTrace();
+        }
+    }
+
+    public void newKickPunishment(KickPunishEntry entry) {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO `staffog_kick` (`uuid`, `reason`, `by_uuid`, `by_name`, `time`) VALUES (?, ?, ?, ?, ?)"
+            );
+            statement.setString(1, entry.getUuid().toString());
+            statement.setString(2, entry.getReason());
+            statement.setString(3, entry.getByUuid().toString());
+            statement.setString(4, entry.getByName());
+            statement.setLong(5, entry.getTime());
+
+            statement.executeUpdate();
+
+            if (entry.getPlayer() != null && entry.getPlayer().isOnline()) {
+                entry.getPlayer().kickPlayer(ChatColor.RED + "You have been kicked for:\n" +
+                        ChatColor.WHITE + entry.getReason() + "\n\n" +
+                        ChatColor.RED + "Please read our rules when you rejoin by running /rules");
+            }
+
+            Bukkit.getServer().broadcastMessage(Message.formatNotification(
+                    "KICK",
+                    "New kick"
+                            + " on " + entry.getName()
+                            + " by " + entry.getByName()));
+
+        } catch (Exception e) {
+            Console.error("Failed to create kick punishment.");
             e.printStackTrace();
         }
     }

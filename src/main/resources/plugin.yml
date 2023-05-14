@@ -11,17 +11,32 @@ commands:
     permission: staffog.command.permban
     usage: /<command> <player> <reason>
 
+  tempban:
+    description: Temporarily ban a player.
+    permission: staffog.command.tempban
+    usage: /<command> <player> <unit> <amount> <reason>
+
   unban:
     description: Unban a player.
     permission: staffog.command.unban
-    usage: /<command> <player>
+    usage: /<command> <player> <reason>
 
   permmute:
     description: Permanently mute a player.
     permission: staffog.command.permmute
     usage: /<command> <player> <reason>
 
+  tempmute:
+    description: Temporarily mute a player.
+    permission: staffog.command.tempmute
+    usage: /<command> <player> <unit> <amount> <reason>
+
   unmute:
     description: Unmute a player.
     permission: staffog.command.unmute
-    usage: /<command> <player>
+    usage: /<command> <player> <reason>
+
+  kick:
+    description: Kick a player.
+    permission: staffog.command.kick
+    usage: /<command> <player> [reason]
