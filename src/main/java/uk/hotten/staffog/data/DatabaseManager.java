@@ -36,6 +36,9 @@ public class DatabaseManager {
         checkNameHistoryTable();
         checkTaskTable();
         checkStatTable();
+        checkWebTable();
+        checkLinkCodeTable();
+        checkStaffIpTable();
     }
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
@@ -227,6 +230,97 @@ public class DatabaseManager {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkWebTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_web", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_web` (" +
+                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
+                    " `username` varchar(128) NOT NULL," +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " `password` varchar(2048) NOT NULL," +
+                    " `admin` bit(1) NOT NULL," +
+                    " PRIMARY KEY (`id`)," +
+                    " UNIQUE KEY `username` (`username`,`uuid`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_web' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_web' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkLinkCodeTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_linkcode", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_linkcode` (" +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " `code` varchar(5) NOT NULL," +
+                    " `admin` bit(1) NOT NULL," +
+                    " UNIQUE KEY `uuid` (`uuid`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_linkcode' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_linkcode' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkStaffIpTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_staffip", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_staffip` (" +
+                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
+                    " `ip` varchar(15) NOT NULL," +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " `initial` bit(1) NOT NULL," +
+                    " `panel_acknowledged` bit(1) NOT NULL," +
+                    " `panel_verified` bit(1) NOT NULL," +
+                    " `game_verified` bit(1) NOT NULL," +
+                    " PRIMARY KEY (`id`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_staffip' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_staffip' table.");
             e.printStackTrace();
         }
     }
