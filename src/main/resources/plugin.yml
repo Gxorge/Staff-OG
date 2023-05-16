@@ -1,6 +1,6 @@
 name: Staff-OG
 main: uk.hotten.staffog.StaffOGPlugin
-version: 1.0-alpha
+version: 1.0-beta
 api-version: 1.18
 author: Gxorge
 description: Punishment system for TrueOG.

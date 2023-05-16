@@ -29,6 +29,15 @@ public class StaffOGPlugin extends JavaPlugin {
 
         getCommand("kick").setExecutor(new KickCommand());
 
+        databaseManager.setStatEntry("server_status", "online");
+
         Console.info("Staff-OG is ready!");
+    }
+
+    @Override
+    public void onDisable() {
+        DatabaseManager.getInstance().setStatEntry("server_status", "offline");
+        DatabaseManager.getInstance().setStatEntry("player_count", "0");
+        DatabaseManager.getInstance().setStatEntry("staff_count", "0");
     }
 }

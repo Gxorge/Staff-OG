@@ -55,6 +55,11 @@ def getCurrentGitBranch() {
             commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
             standardOutput = stdout
         }
+
+        if (stdout.toString().toLowerCase().trim().equals("head")) {
+            return "ogsuite";
+        }
+
         return stdout.toString().trim()
     } catch (ignored) {
         return 'unknown'

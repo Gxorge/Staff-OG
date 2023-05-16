@@ -9,11 +9,13 @@ import java.sql.*;
 
 public class DatabaseManager {
 
-    private JavaPlugin plugin;
+    @Getter private JavaPlugin plugin;
     @Getter private static DatabaseManager instance;
 
     private String host, username, password, database;
     private int port;
+
+    public int staffOnline;
 
     public DatabaseManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -25,9 +27,15 @@ public class DatabaseManager {
         database = plugin.getConfig().getString("sqlDatabase");
         port = plugin.getConfig().getInt("sqlPort");
 
+        plugin.getServer().getPluginManager().registerEvents(new DataEventListener(), plugin);
+
+        staffOnline = 0;
+
         for (PunishType pt : PunishType.values()) checkPunishmentTable(pt.getTable());
         checkKickTable();
         checkNameHistoryTable();
+        checkTaskTable();
+        checkStatTable();
     }
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
@@ -43,7 +51,6 @@ public class DatabaseManager {
             ResultSet resultSet = meta.getTables(null, null, table, new String[] {"TABLE"});
 
             if (resultSet.next()) {
-                Console.info(table + " exists.");
                 return;
             }
 
@@ -70,7 +77,7 @@ public class DatabaseManager {
             Console.info("Created '" + table + "' table, was missing.");
 
         } catch (Exception e) {
-            Console.error("Failed to check " + table + " table.");
+            Console.error("Failed to check '" + table + "' table.");
             e.printStackTrace();
         }
     }
@@ -101,7 +108,7 @@ public class DatabaseManager {
             Console.info("Created 'staffog_kick' table, was missing.");
 
         } catch (Exception e) {
-            Console.error("Failed to check staffog_kick table.");
+            Console.error("Failed to check 'staffog_kick' table.");
             e.printStackTrace();
         }
     }
@@ -130,7 +137,96 @@ public class DatabaseManager {
             Console.info("Created 'staffog_history' table, was missing.");
 
         } catch (Exception e) {
-            Console.error("Failed to check staffog_history table.");
+            Console.error("Failed to check 'staffog_history' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkTaskTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_task", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_task` (" +
+                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
+                    " `task` varchar(2048) NOT NULL," +
+                    " `data` varchar(2048) NOT NULL," +
+                    " PRIMARY KEY (`id`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_task' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_task' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkStatTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_stat", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_stat` (" +
+                    " `name` varchar(2048) NOT NULL," +
+                    " `stat` varchar(2048) NOT NULL," +
+                    " UNIQUE KEY `name` (`name`) USING HASH" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_stat' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_stat' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private boolean doesStatIncludeEntry(String entry) {
+        try (Connection connection = createConnection()) {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_stat` WHERE `name`=?");
+            statement.setString(1, entry);
+
+            ResultSet rs = statement.executeQuery();
+
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public void setStatEntry(String entry, String stat) {
+        try (Connection connection = createConnection()) {
+
+            if (!doesStatIncludeEntry(entry)) {
+                PreparedStatement statement = connection.prepareStatement("INSERT INTO `staffog_stat` (`name`, `stat`) VALUE (?, ?)");
+                statement.setString(1, entry);
+                statement.setString(2, stat);
+                statement.executeUpdate();
+            } else {
+                PreparedStatement statement = connection.prepareStatement("UPDATE `staffog_stat` SET `stat`=? WHERE `name`=?");
+                statement.setString(1, stat);
+                statement.setString(2, entry);
+                statement.executeUpdate();
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
