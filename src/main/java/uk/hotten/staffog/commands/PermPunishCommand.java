@@ -27,9 +27,9 @@ public class PermPunishCommand implements CommandExecutor {
         }
 
         PunishType commandType;
-        if (label.toLowerCase().equals("permban"))
+        if (label.toLowerCase().contains("permban"))
             commandType = PunishType.BAN;
-        else if (label.toLowerCase().equals("permmute"))
+        else if (label.toLowerCase().contains("permmute"))
             commandType = PunishType.MUTE;
         else {
             sender.sendMessage(Message.format(ChatColor.RED + "Unsupported type for command."));

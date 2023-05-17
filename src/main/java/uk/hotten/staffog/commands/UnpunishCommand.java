@@ -24,9 +24,9 @@ public class UnpunishCommand implements CommandExecutor {
         }
 
         PunishType commandType;
-        if (label.toLowerCase().equals("unban"))
+        if (label.toLowerCase().contains("unban"))
             commandType = PunishType.BAN;
-        else if (label.toLowerCase().equals("unmute"))
+        else if (label.toLowerCase().contains("unmute"))
             commandType = PunishType.MUTE;
         else {
             sender.sendMessage(Message.format(ChatColor.RED + "Unsupported type for command."));

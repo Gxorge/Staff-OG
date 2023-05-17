@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import uk.hotten.staffog.StaffOGPlugin;
 
 public class DataEventListener implements Listener {
 
@@ -12,7 +13,7 @@ public class DataEventListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         DatabaseManager dbm = DatabaseManager.getInstance();
         dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
-        if (event.getPlayer().hasPermission("staffog.isstaff")) {
+        if (StaffOGPlugin.getVaultPerms().has(event.getPlayer(), "staffog.isstaff")) {
             dbm.staffOnline++;
             dbm.setStatEntry("staff_count", String.valueOf(dbm.staffOnline));
         }
@@ -24,7 +25,7 @@ public class DataEventListener implements Listener {
             DatabaseManager dbm = DatabaseManager.getInstance();
             dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
 
-            if (event.getPlayer().hasPermission("staffog.isstaff")) {
+            if (StaffOGPlugin.getVaultPerms().has(event.getPlayer(), "staffog.isstaff")) {
                 dbm.staffOnline--;
                 dbm.setStatEntry("staff_count", String.valueOf(dbm.staffOnline));
             }

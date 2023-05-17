@@ -67,9 +67,9 @@ public class TempPunishCommand implements CommandExecutor {
         }
 
         PunishType commandType;
-        if (label.toLowerCase().equals("tempban"))
+        if (label.toLowerCase().contains("tempban"))
             commandType = PunishType.BAN;
-        else if (label.toLowerCase().equals("tempmute"))
+        else if (label.toLowerCase().contains("tempmute"))
             commandType = PunishType.MUTE;
         else {
             sender.sendMessage(Message.format(ChatColor.RED + "Unsupported type for command."));

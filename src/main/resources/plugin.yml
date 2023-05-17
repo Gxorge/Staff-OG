@@ -4,8 +4,14 @@ version: 1.0-beta
 api-version: 1.18
 author: Gxorge
 description: Punishment system for TrueOG.
+depend: [Vault]
 
 commands:
+  stafflink:
+    description: Link your in-game account to the staff panel.
+    permission: staffog.panelaccess
+    usage: /<command>
+
   permban:
     description: Permanently ban a player.
     permission: staffog.command.permban

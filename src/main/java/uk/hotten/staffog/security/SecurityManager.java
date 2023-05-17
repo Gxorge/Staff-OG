@@ -9,6 +9,7 @@ import uk.hotten.staffog.utils.Console;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class SecurityManager {
@@ -16,9 +17,12 @@ public class SecurityManager {
     @Getter private static SecurityManager instance;
     private JavaPlugin plugin;
 
+    @Getter private HashMap<UUID, StaffIPInfo> staffIPInfos;
+
     public SecurityManager(JavaPlugin plugin) {
         this.plugin = plugin;
         instance = this;
+        staffIPInfos = new HashMap<>();
 
         plugin.getServer().getPluginManager().registerEvents(new SecurityEventListener(), plugin);
     }
@@ -106,6 +110,78 @@ public class SecurityManager {
             Console.error("Failed to update ip entry.");
             e.printStackTrace();
         }
+    }
+
+    private boolean doesLinkCodeExist(String code) {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_linkcode` WHERE `code`=?");
+            statement.setString(1, code);
+
+            ResultSet rs = statement.executeQuery();
+
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String doesPlayerHaveLinkCode(UUID uuid) {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_linkcode` WHERE `uuid`=?");
+            statement.setString(1, uuid.toString());
+
+            ResultSet rs = statement.executeQuery();
+
+            if (!rs.next())
+                return null;
+
+            return rs.getString("code");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String createLinkCode(UUID uuid, boolean admin) {
+        String code = "";
+        String possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "0123456789"
+                + "abcdefghijklmnopqrstuvxyz";
+
+        StringBuilder sb = new StringBuilder();
+        while (code.equals("")) {
+            for (int i = 0; i < 5; i++) {
+                int index = (int)(possibleChars.length() * Math.random());
+
+                // add Character one by one in end of sb
+                sb.append(possibleChars.charAt(index));
+            }
+
+            if (!doesLinkCodeExist(sb.toString()))
+                code = sb.toString();
+        }
+
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO `staffog_linkcode` (`uuid`, `code`, `admin`) VALUES (?, ?, ?)"
+            );
+            statement.setString(1, uuid.toString());
+            statement.setString(2, code);
+            statement.setInt(3, (admin ? 1 : 0));
+
+
+            statement.executeUpdate();
+
+        } catch (Exception e) {
+            Console.error("Failed to create link code.");
+            e.printStackTrace();
+            return null;
+        }
+
+        return code;
     }
 
 }
