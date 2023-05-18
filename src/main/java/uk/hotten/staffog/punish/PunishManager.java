@@ -140,6 +140,42 @@ public class PunishManager {
         }
     }
 
+    public PunishEntry getPunishment(PunishType type, int id) {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `" + type.getTable() + "` WHERE `id`=?");
+            statement.setLong(1, id);
+
+            ResultSet rs = statement.executeQuery();
+
+            if (!rs.next())
+                return null;
+
+            PunishEntry entry = new PunishEntry(type);
+            entry.setId(rs.getLong("id"));
+            entry.setUuid(UUID.fromString(rs.getString("uuid")));
+            entry.setReason(rs.getString("reason"));
+            entry.setByUuid(rs.getString("by_uuid"));
+            entry.setByName(rs.getString("by_name"));
+            entry.setTime(rs.getLong("time"));
+            entry.setUntil(rs.getLong("until"));
+            entry.setActive(rs.getInt("active") == 1);
+
+            if (entry.checkDurationOver()) {
+                expirePunishment(entry);
+                return null;
+            }
+
+            return entry;
+
+
+        } catch (Exception e) {
+            Console.error("Failed to get punishment info for id " + id);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public PunishEntry checkActivePunishment(PunishType type, UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 

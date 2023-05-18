@@ -26,6 +26,7 @@ repositories {
 
 
 dependencies {
+    implementation 'com.google.code.gson:gson:2.10.1'
     api 'commons-io:commons-io:2.11.0'
     api 'org.apache.commons:commons-pool2:2.11.1'
     api 'org.mariadb.jdbc:mariadb-java-client:3.1.3'

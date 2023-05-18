@@ -8,6 +8,7 @@ import uk.hotten.staffog.commands.*;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.security.SecurityManager;
+import uk.hotten.staffog.tasks.TaskManager;
 import uk.hotten.staffog.utils.Console;
 
 public class StaffOGPlugin extends JavaPlugin {
@@ -28,6 +29,7 @@ public class StaffOGPlugin extends JavaPlugin {
         DatabaseManager databaseManager = new DatabaseManager(this);
         PunishManager punishManager = new PunishManager(this);
         SecurityManager securityManager = new SecurityManager(this);
+        TaskManager taskManager = new TaskManager(this);
 
         getCommand("stafflink").setExecutor(new StaffLinkCommand());
 
