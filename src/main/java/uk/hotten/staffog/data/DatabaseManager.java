@@ -251,6 +251,7 @@ public class DatabaseManager {
                     " `username` varchar(128) NOT NULL," +
                     " `uuid` varchar(36) NOT NULL," +
                     " `password` varchar(2048) NOT NULL," +
+                    " `active` bit(1) NOT NULL DEFAULT b'1'," +
                     " `admin` bit(1) NOT NULL," +
                     " PRIMARY KEY (`id`)," +
                     " UNIQUE KEY `username` (`username`,`uuid`)" +
