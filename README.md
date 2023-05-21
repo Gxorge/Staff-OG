@@ -6,7 +6,7 @@ Punishment system for TrueOG.
 - /temp[ban/mute] <player> <time unit> <amount> <reason> - staffog.command.temp[ban/mute]
 - /un[ban/mute] <player> <reason> - staffog.command.un[ban/mute]
 - /kick <player> [reason] - staffog.command.kick
-- /panellink - staffog.panelaccess
+- /linkpanel - staffog.panelaccess
 
 ### Other Permissions
 - staffog.panelaccess - allows a user to register for the web panel.
