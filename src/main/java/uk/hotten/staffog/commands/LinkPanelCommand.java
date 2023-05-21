@@ -10,7 +10,7 @@ import uk.hotten.staffog.security.SecurityManager;
 import uk.hotten.staffog.security.data.StaffIPInfo;
 import uk.hotten.staffog.utils.Message;
 
-public class PanelLinkCommand implements CommandExecutor {
+public class LinkPanelCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {

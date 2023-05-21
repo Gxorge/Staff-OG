@@ -31,7 +31,7 @@ public class StaffOGPlugin extends JavaPlugin {
         SecurityManager securityManager = new SecurityManager(this);
         TaskManager taskManager = new TaskManager(this);
 
-        getCommand("panellink").setExecutor(new PanelLinkCommand());
+        getCommand("linkpanel").setExecutor(new LinkPanelCommand());
 
         getCommand("permban").setExecutor(new PermPunishCommand());
         getCommand("tempban").setExecutor(new TempPunishCommand());
