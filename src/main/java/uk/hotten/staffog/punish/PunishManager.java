@@ -8,6 +8,7 @@ import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
+import uk.hotten.staffog.security.SecurityManager;
 import uk.hotten.staffog.utils.Console;
 import uk.hotten.staffog.utils.Message;
 import uk.hotten.staffog.utils.TimeUtils;
@@ -133,6 +134,8 @@ public class PunishManager {
                     "New " + entry.getType().toString().toLowerCase()
                             + " on " + entry.getName() + " for "
                             + duration + " by " + entry.getByName()));
+
+            SecurityManager.getInstance().checkAndDeactivateStaffAccount(entry.getUuid());
 
         } catch (Exception e) {
             Console.error("Failed to create punishment.");
@@ -274,10 +277,7 @@ public class PunishManager {
             }
 
             Bukkit.getServer().broadcastMessage(Message.formatNotification(
-                    "KICK",
-                    "New kick"
-                            + " on " + entry.getName()
-                            + " by " + entry.getByName()));
+                    "KICK", entry.getName() + " has been kicked by " + entry.getByName()));
 
         } catch (Exception e) {
             Console.error("Failed to create kick punishment.");

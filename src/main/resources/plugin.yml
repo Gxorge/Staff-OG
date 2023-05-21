@@ -7,7 +7,7 @@ description: Punishment system for TrueOG.
 depend: [Vault]
 
 commands:
-  stafflink:
+  panellink:
     description: Link your in-game account to the staff panel.
     permission: staffog.panelaccess
     usage: /<command>

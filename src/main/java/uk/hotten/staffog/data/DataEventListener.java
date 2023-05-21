@@ -1,6 +1,7 @@
 package uk.hotten.staffog.data;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -11,25 +12,28 @@ public class DataEventListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        DatabaseManager dbm = DatabaseManager.getInstance();
-        dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
-        if (StaffOGPlugin.getVaultPerms().has(event.getPlayer(), "staffog.isstaff")) {
-            dbm.staffOnline++;
-            dbm.setStatEntry("staff_count", String.valueOf(dbm.staffOnline));
-        }
+        updatePlayerCounts();
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
-        Bukkit.getServer().getScheduler().runTaskLater(DatabaseManager.getInstance().getPlugin(), () -> {
-            DatabaseManager dbm = DatabaseManager.getInstance();
-            dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
-
-            if (StaffOGPlugin.getVaultPerms().has(event.getPlayer(), "staffog.isstaff")) {
-                dbm.staffOnline--;
-                dbm.setStatEntry("staff_count", String.valueOf(dbm.staffOnline));
-            }
-        }, 5);
+        Bukkit.getServer().getScheduler().runTaskLater(DatabaseManager.getInstance().getPlugin(), this::updatePlayerCounts, 10);
     }
 
+    private void updatePlayerCounts() {
+        DatabaseManager dbm = DatabaseManager.getInstance();
+
+        // All players
+        dbm.setStatEntry("player_count", String.valueOf(Bukkit.getServer().getOnlinePlayers().size()));
+
+        // Staff
+        int amount = 0;
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            if (StaffOGPlugin.getVaultPerms().has(p, "staffog.isstaff")) {
+                amount++;
+            }
+        }
+
+        dbm.setStatEntry("staff_count", String.valueOf(amount));
+    }
 }

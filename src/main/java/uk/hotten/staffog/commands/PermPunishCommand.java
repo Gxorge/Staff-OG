@@ -68,6 +68,7 @@ public class PermPunishCommand implements CommandExecutor {
         entry.setReason(reason);
 
         PunishManager.getInstance().newPunishment(entry);
+        sender.sendMessage(Message.format(ChatColor.GRAY + "You have " + commandType.getBroadcastMessage() + " " + entry.getName() + " for permanent."));
         return true;
     }
 }

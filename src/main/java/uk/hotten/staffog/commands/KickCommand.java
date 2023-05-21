@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.utils.Message;
+import uk.hotten.staffog.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +48,7 @@ public class KickCommand implements CommandExecutor {
         }
 
         PunishManager.getInstance().newKickPunishment(entry);
+        sender.sendMessage(Message.format(ChatColor.GRAY + "You have kicked " + entry.getName() + "."));
         return true;
     }
 }

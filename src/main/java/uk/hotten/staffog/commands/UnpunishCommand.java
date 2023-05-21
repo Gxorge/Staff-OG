@@ -9,6 +9,7 @@ import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Message;
+import uk.hotten.staffog.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +55,8 @@ public class UnpunishCommand implements CommandExecutor {
         entry.setRemovedReason(reason);
 
         PunishManager.getInstance().removePunishment(entry);
+        sender.sendMessage(Message.format(ChatColor.GRAY + "You have un" + commandType.getBroadcastMessage() + " " + entry.getName() + "."));
+
         return true;
     }
 }

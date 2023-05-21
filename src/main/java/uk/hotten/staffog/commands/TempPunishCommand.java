@@ -110,6 +110,7 @@ public class TempPunishCommand implements CommandExecutor {
         entry.setReason(reason);
 
         PunishManager.getInstance().newPunishment(entry);
+        sender.sendMessage(Message.format(ChatColor.GRAY + "You have " + commandType.getBroadcastMessage() + " " + entry.getName() + " for " + TimeUtils.formatMillisecondTime(entry.calculateDuration()) + "."));
         return true;
     }
 }

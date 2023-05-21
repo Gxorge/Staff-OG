@@ -15,8 +15,6 @@ public class DatabaseManager {
     private String host, username, password, database;
     private int port;
 
-    public int staffOnline;
-
     public DatabaseManager(JavaPlugin plugin) {
         this.plugin = plugin;
         instance = this;
@@ -28,8 +26,6 @@ public class DatabaseManager {
         port = plugin.getConfig().getInt("sqlPort");
 
         plugin.getServer().getPluginManager().registerEvents(new DataEventListener(), plugin);
-
-        staffOnline = 0;
 
         for (PunishType pt : PunishType.values()) checkPunishmentTable(pt.getTable());
         checkKickTable();

@@ -184,4 +184,23 @@ public class SecurityManager {
         return code;
     }
 
+    public void checkAndDeactivateStaffAccount(UUID uuid) {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_web` WHERE `uuid`=?");
+            statement.setString(1, uuid.toString());
+
+            ResultSet rs = statement.executeQuery();
+
+            if (!rs.next())
+                return;
+
+            PreparedStatement updateStatement = connection.prepareStatement("UPDATE `staffog_web` SET `active`=0 WHERE `uuid`=? ");
+            updateStatement.setString(1, uuid.toString());
+            updateStatement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
