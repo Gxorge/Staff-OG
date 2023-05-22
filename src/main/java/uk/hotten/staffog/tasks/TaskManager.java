@@ -32,7 +32,7 @@ public class TaskManager {
                     }
                 }
             }
-        }, 0, 1200);
+        }, 0, 200);
     }
 
     private ArrayList<TaskEntry> checkForTasks() {
