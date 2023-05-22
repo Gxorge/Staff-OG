@@ -321,4 +321,32 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
+
+    private void checkAuditTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_staffip", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_audit` (" +
+                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
+                    " `type` varchar(2048) NOT NULL," +
+                    " `data` varchar(2048) NOT NULL," +
+                    " PRIMARY KEY (`id`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_audit' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_audit' table.");
+            e.printStackTrace();
+        }
+    }
 }
