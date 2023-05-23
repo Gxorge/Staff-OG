@@ -157,12 +157,20 @@ public class PunishManager {
             PunishEntry entry = new PunishEntry(type);
             entry.setId(rs.getLong("id"));
             entry.setUuid(UUID.fromString(rs.getString("uuid")));
+            entry.setName(getNameFromUUID(entry.getUuid()));
             entry.setReason(rs.getString("reason"));
             entry.setByUuid(rs.getString("by_uuid"));
             entry.setByName(rs.getString("by_name"));
             entry.setTime(rs.getLong("time"));
             entry.setUntil(rs.getLong("until"));
             entry.setActive(rs.getInt("active") == 1);
+            if (!entry.isActive()) {
+                entry.setRemovedReason(rs.getString("removed_uuid"));
+                entry.setRemovedName(rs.getString("removed_name"));
+                entry.setRemovedTime(rs.getLong("removed_time"));
+                entry.setRemovedReason(rs.getString("removed_reason"));
+            }
+            Console.info("got " + id);
 
             if (entry.checkDurationOver()) {
                 expirePunishment(entry);
@@ -244,7 +252,6 @@ public class PunishManager {
 
             statement.executeUpdate();
 
-            String duration = TimeUtils.formatMillisecondTime(entry.calculateDuration());
             if (entry.getType() == PunishType.MUTE && Bukkit.getServer().getPlayer(entry.getUuid()) != null) {
                 Bukkit.getServer().getPlayer(entry.getUuid()).sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted."));
             }
@@ -255,6 +262,14 @@ public class PunishManager {
             Console.error("Failed to remove punishment.");
             e.printStackTrace();
         }
+    }
+
+    public void visualRemovePunishment(PunishEntry entry) {
+        if (entry.getType() == PunishType.MUTE && Bukkit.getServer().getPlayer(entry.getUuid()) != null) {
+            Bukkit.getServer().getPlayer(entry.getUuid()).sendMessage(Message.format(ChatColor.GREEN + "You have been unmuted."));
+        }
+
+        Message.staffBroadcast(Message.formatNotification("UN" + entry.getType(), entry.getName() + " has been un" + entry.getType().getBroadcastMessage() + " by " + entry.getRemovedName()));
     }
 
     public void newKickPunishment(KickPunishEntry entry) {

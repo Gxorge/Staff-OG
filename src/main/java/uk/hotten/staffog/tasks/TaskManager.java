@@ -65,12 +65,7 @@ public class TaskManager {
         Gson gson = new Gson();
         UnpunishTask task = gson.fromJson(entry.getData(), UnpunishTask.class);
         PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
-        punishEntry.setRemovedUuid(task.getRemovedUuid().toString());
-        punishEntry.setRemovedName(task.getRemovedName());
-        punishEntry.setRemovedReason(task.getRemovedReason());
-        punishEntry.setRemovedTime(task.getRemovedTime());
-        punishEntry.setActive(false);
-        PunishManager.getInstance().removePunishment(punishEntry);
+        PunishManager.getInstance().visualRemovePunishment(punishEntry);
     }
 
     private void deleteTask(int id) {

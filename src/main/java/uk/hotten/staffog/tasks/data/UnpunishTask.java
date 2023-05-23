@@ -9,18 +9,11 @@ public class UnpunishTask {
 
     @Getter private PunishType type;
     @Getter private int id;
-    @Getter private UUID removedUuid;
-    @Getter private String removedName;
-    @Getter private String removedReason;
-    @Getter private long removedTime;
+    @Getter private String name;
 
-    public UnpunishTask(String type, int id, String removedUuid, String removedName, String removedReason, long removedTime) {
+    public UnpunishTask(String type, int id) {
         this.type = PunishType.valueOf(type);
         this.id = id;
-        this.removedUuid = UUID.fromString(removedUuid);
-        this.removedName = removedName;
-        this.removedReason = removedReason;
-        this.removedTime = removedTime;
     }
 
     public UnpunishTask() { }
