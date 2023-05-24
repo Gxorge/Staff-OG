@@ -20,7 +20,6 @@ public class SecurityEventListener implements Listener {
         UUID uuid = event.getUniqueId();
 
         if (!StaffOGPlugin.getVaultPerms().playerHas("world", Bukkit.getOfflinePlayer(uuid), "staffog.panelaccess")) {
-            Console.info("No perms");
             return;
         }
 

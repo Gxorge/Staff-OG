@@ -170,7 +170,6 @@ public class PunishManager {
                 entry.setRemovedTime(rs.getLong("removed_time"));
                 entry.setRemovedReason(rs.getString("removed_reason"));
             }
-            Console.info("got " + id);
 
             if (entry.checkDurationOver()) {
                 expirePunishment(entry);
