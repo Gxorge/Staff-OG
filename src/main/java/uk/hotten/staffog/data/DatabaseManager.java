@@ -37,6 +37,7 @@ public class DatabaseManager {
         checkStaffIpTable();
         checkAuditTable();
         checkAppealTable();
+        checkReportTable();
     }
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
@@ -340,6 +341,7 @@ public class DatabaseManager {
                     " `id` int(11) NOT NULL AUTO_INCREMENT," +
                     " `type` varchar(2048) NOT NULL," +
                     " `data` varchar(2048) NOT NULL," +
+                    " `time` bigint(20) NOT NULL," +
                     " PRIMARY KEY (`id`)" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
@@ -384,6 +386,43 @@ public class DatabaseManager {
 
         } catch (Exception e) {
             Console.error("Failed to check 'staffog_appeal' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkReportTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_report", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_report` (" +
+                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " `by_uuid` varchar(36) NOT NULL," +
+                    " `time` bigint(20) NOT NULL," +
+                    " `type` varchar(128) NOT NULL," +
+                    " `reason` varchar(2048) NOT NULL," +
+                    " `crid` int(11) DEFAULT NULL," +
+                    " `open` bit(1) NOT NULL DEFAULT b'1'," +
+                    " `assigned` varchar(36) DEFAULT NULL," +
+                    " `verdict` bit(1) DEFAULT NULL," +
+                    " `verdict_time` bigint(20) DEFAULT NULL," +
+                    " `comment` varchar(2048) DEFAULT NULL," +
+                    " PRIMARY KEY (`id`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_report' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_report' table.");
             e.printStackTrace();
         }
     }
