@@ -1,11 +1,14 @@
 package uk.hotten.staffog.punish;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import uk.hotten.staffog.punish.data.ChatReportEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Message;
@@ -45,4 +48,14 @@ public class PunishEventListener implements Listener {
                 + ChatColor.WHITE + TimeUtils.formatMillisecondTime(entry.calculateRemaining()))));
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST )
+    public void onAsyncChatReport(AsyncPlayerChatEvent event) {
+        if (event.isCancelled())
+            return;
+
+        PunishManager pm = PunishManager.getInstance();
+        ChatReportEntry entry = new ChatReportEntry(event.getPlayer().getUniqueId(), event.getPlayer().getName(), event.getMessage(), System.currentTimeMillis());
+        pm.getChatReportEntries().add(entry);
+        Bukkit.getServer().getScheduler().runTaskLater(pm.getPlugin(), () -> pm.getChatReportEntries().remove(entry), 2400); // remove 2m later
+    }
 }

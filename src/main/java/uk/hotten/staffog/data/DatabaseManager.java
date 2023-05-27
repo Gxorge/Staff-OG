@@ -443,6 +443,7 @@ public class DatabaseManager {
             String sql = "CREATE TABLE `staffog_chatreport` (" +
                     " `id` int(11) NOT NULL AUTO_INCREMENT," +
                     " `uuid` varchar(36) NOT NULL," +
+                    " `by_uuid` varchar(36) NOT NULL," +
                     " `time` bigint(20) NOT NULL," +
                     " `messages` varchar(2048) NOT NULL," +
                     " PRIMARY KEY (`id`)" +

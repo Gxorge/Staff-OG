@@ -32,6 +32,7 @@ public class StaffOGPlugin extends JavaPlugin {
         TaskManager taskManager = new TaskManager(this);
 
         getCommand("linkpanel").setExecutor(new LinkPanelCommand());
+        getCommand("chatreport").setExecutor(new ChatReportCommand());
 
         getCommand("permban").setExecutor(new PermPunishCommand());
         getCommand("tempban").setExecutor(new TempPunishCommand());
@@ -39,7 +40,6 @@ public class StaffOGPlugin extends JavaPlugin {
         getCommand("permmute").setExecutor(new PermPunishCommand());
         getCommand("tempmute").setExecutor(new TempPunishCommand());
         getCommand("unmute").setExecutor(new UnpunishCommand());
-
         getCommand("kick").setExecutor(new KickCommand());
 
         databaseManager.setStatEntry("server_status", "online");

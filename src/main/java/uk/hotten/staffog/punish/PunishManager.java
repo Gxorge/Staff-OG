@@ -1,10 +1,13 @@
 package uk.hotten.staffog.punish;
 
+import com.google.gson.Gson;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import uk.hotten.staffog.data.DatabaseManager;
+import uk.hotten.staffog.punish.data.ChatReportEntry;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
 import uk.hotten.staffog.punish.data.PunishType;
@@ -16,17 +19,21 @@ import uk.hotten.staffog.utils.TimeUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Date;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class PunishManager {
 
-    private JavaPlugin plugin;
+    @Getter private JavaPlugin plugin;
     @Getter private static PunishManager instance;
+
+    @Getter private ArrayList<ChatReportEntry> chatReportEntries;
 
     public PunishManager(JavaPlugin plugin) {
         this.plugin = plugin;
         instance = this;
+        chatReportEntries = new ArrayList<>();
 
         plugin.getServer().getPluginManager().registerEvents(new PunishEventListener(), plugin);
     }
@@ -296,6 +303,58 @@ public class PunishManager {
         } catch (Exception e) {
             Console.error("Failed to create kick punishment.");
             e.printStackTrace();
+        }
+    }
+
+    public boolean isIncludedInCurrentChatReport(String name) {
+        for (ChatReportEntry entry : chatReportEntries) {
+            if (name.equalsIgnoreCase(entry.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public UUID getUUIDFromChatReport(String name) {
+        for (ChatReportEntry entry : chatReportEntries) {
+            if (name.equalsIgnoreCase(entry.getName())) {
+                return entry.getUuid();
+            }
+        }
+
+        return null;
+    }
+
+    public String exportChatReport(UUID by, UUID reported) {
+        Gson gson = new Gson();
+        String data = gson.toJson(chatReportEntries);
+
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO `staffog_chatreport` (`uuid`, `by_uuid`, `time`, `messages`) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            statement.setString(1, reported.toString());
+            statement.setString(2, by.toString());
+            statement.setLong(3, System.currentTimeMillis());
+            statement.setString(4, data);
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows == 0)
+                return null;
+
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs.next()) {
+                return "" + rs.getInt(1);
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

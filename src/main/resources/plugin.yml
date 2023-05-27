@@ -12,6 +12,10 @@ commands:
     permission: staffog.panelaccess
     usage: /<command>
 
+  chatreport:
+    description: Takes a snapshot of a player's messages, used for reporting chat offences.
+    usage: /<command> <player>
+
   permban:
     description: Permanently ban a player.
     permission: staffog.command.permban
