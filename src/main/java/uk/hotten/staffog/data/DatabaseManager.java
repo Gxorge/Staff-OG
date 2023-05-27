@@ -38,6 +38,7 @@ public class DatabaseManager {
         checkAuditTable();
         checkAppealTable();
         checkReportTable();
+        checkChatReportTable();
     }
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
@@ -423,6 +424,35 @@ public class DatabaseManager {
 
         } catch (Exception e) {
             Console.error("Failed to check 'staffog_report' table.");
+            e.printStackTrace();
+        }
+    }
+
+    private void checkChatReportTable() {
+        try (Connection connection = createConnection()) {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, "staffog_chatreport", new String[] {"TABLE"});
+
+            if (resultSet.next()) {
+                return;
+            }
+
+            // Table does not exist
+            Statement statement = connection.createStatement();
+
+            String sql = "CREATE TABLE `staffog_chatreport` (" +
+                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
+                    " `uuid` varchar(36) NOT NULL," +
+                    " `time` bigint(20) NOT NULL," +
+                    " `messages` varchar(2048) NOT NULL," +
+                    " PRIMARY KEY (`id`)" +
+                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+            statement.executeUpdate(sql);
+            Console.info("Created 'staffog_chatreport' table, was missing.");
+
+        } catch (Exception e) {
+            Console.error("Failed to check 'staffog_chatreport' table.");
             e.printStackTrace();
         }
     }
