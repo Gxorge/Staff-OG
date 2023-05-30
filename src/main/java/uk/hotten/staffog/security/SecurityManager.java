@@ -2,15 +2,21 @@ package uk.hotten.staffog.security;
 
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import uk.hotten.staffog.data.DatabaseManager;
+import uk.hotten.staffog.data.jooq.tables.records.StaffogLinkcodeRecord;
+import uk.hotten.staffog.data.jooq.tables.records.StaffogStaffipRecord;
+import uk.hotten.staffog.data.jooq.tables.records.StaffogWebRecord;
 import uk.hotten.staffog.security.data.StaffIPInfo;
 import uk.hotten.staffog.utils.Console;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.UUID;
+
+import static uk.hotten.staffog.data.jooq.Tables.*;
 
 public class SecurityManager {
 
@@ -30,23 +36,24 @@ public class SecurityManager {
     public StaffIPInfo isIpRecognised(UUID uuid, String ip) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_staffip` WHERE `uuid`=? AND `ip`=?");
-            statement.setString(1, uuid.toString());
-            statement.setString(2, ip);
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            StaffogStaffipRecord record = dsl.select(STAFFOG_STAFFIP.asterisk())
+                    .from(STAFFOG_STAFFIP)
+                    .where(STAFFOG_STAFFIP.UUID.eq(uuid.toString()))
+                    .and(STAFFOG_STAFFIP.IP.eq(ip))
+                    .fetchOneInto(STAFFOG_STAFFIP);
 
-            ResultSet rs = statement.executeQuery();
-
-            if (!rs.next())
+            if (record == null)
                 return null;
 
             return new StaffIPInfo(
-                    rs.getInt("id"),
-                    UUID.fromString(rs.getString("uuid")),
-                    rs.getString("ip"),
-                    rs.getInt("initial") == 1,
-                    rs.getInt("panel_acknowledged") == 1,
-                    rs.getInt("panel_verified") == 1,
-                    rs.getInt("game_verified") == 1
+                    record.getId(),
+                    UUID.fromString(record.getUuid()),
+                    record.getIp(),
+                    record.getInitial(),
+                    record.getPanelAcknowledged(),
+                    record.getPanelVerified(),
+                    record.getGameVerified()
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -57,12 +64,10 @@ public class SecurityManager {
     public boolean hasUUIDGotIp(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_staffip` WHERE `uuid`=?");
-            statement.setString(1, uuid.toString());
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            return dsl.fetchExists(dsl.selectFrom(STAFFOG_STAFFIP)
+                    .where(STAFFOG_STAFFIP.UUID.eq(uuid.toString())));
 
-            ResultSet rs = statement.executeQuery();
-
-            return rs.next();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -71,18 +76,16 @@ public class SecurityManager {
 
     public void createIpEntry(StaffIPInfo info) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO `staffog_staffip` (`ip`, `uuid`, `initial`, `panel_acknowledged`, `panel_verified`, `game_verified`) VALUES (?, ?, ?, ?, ?, ?)"
-            );
-            statement.setString(1, info.getIp());
-            statement.setString(2, info.getUuid().toString());
-            statement.setInt(3, (info.isInitial() ? 1 : 0));
-            statement.setInt(4, (info.isPanelAcknowledged() ? 1 : 0));
-            statement.setInt(5, (info.isPanelVerified() ? 1 : 0));
-            statement.setInt(6, (info.isGameVerified() ? 1 : 0));
 
-
-            statement.executeUpdate();
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            dsl.insertInto(STAFFOG_STAFFIP)
+                    .set(STAFFOG_STAFFIP.IP, info.getIp())
+                    .set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
+                    .set(STAFFOG_STAFFIP.INITIAL, info.isInitial())
+                    .set(STAFFOG_STAFFIP.PANEL_ACKNOWLEDGED, info.isPanelAcknowledged())
+                    .set(STAFFOG_STAFFIP.PANEL_VERIFIED, info.isPanelVerified())
+                    .set(STAFFOG_STAFFIP.GAME_VERIFIED, info.isGameVerified())
+                    .execute();
 
         } catch (Exception e) {
             Console.error("Failed to create ip entry.");
@@ -92,19 +95,17 @@ public class SecurityManager {
 
     public void updateIpEntry(StaffIPInfo info) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE `staffog_staffip` SET `ip`=?, `uuid`=?, `initial`=?, `panel_acknowledged`=?, `panel_verified`=?, `game_verified`=? WHERE `id`=?"
-            );
-            statement.setString(1, info.getIp());
-            statement.setString(2, info.getUuid().toString());
-            statement.setInt(3, (info.isInitial() ? 1 : 0));
-            statement.setInt(4, (info.isPanelAcknowledged() ? 1 : 0));
-            statement.setInt(5, (info.isPanelVerified() ? 1 : 0));
-            statement.setInt(6, (info.isGameVerified() ? 1 : 0));
-            statement.setInt(7, info.getId());
 
-
-            statement.executeUpdate();
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            dsl.update(STAFFOG_STAFFIP)
+                    .set(STAFFOG_STAFFIP.IP, info.getIp())
+                    .set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
+                    .set(STAFFOG_STAFFIP.INITIAL, info.isInitial())
+                    .set(STAFFOG_STAFFIP.PANEL_ACKNOWLEDGED, info.isPanelAcknowledged())
+                    .set(STAFFOG_STAFFIP.PANEL_VERIFIED, info.isPanelVerified())
+                    .set(STAFFOG_STAFFIP.GAME_VERIFIED, info.isGameVerified())
+                    .where(STAFFOG_STAFFIP.ID.eq(info.getId()))
+                    .execute();
 
         } catch (Exception e) {
             Console.error("Failed to update ip entry.");
@@ -115,12 +116,10 @@ public class SecurityManager {
     private boolean doesLinkCodeExist(String code) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_linkcode` WHERE `code`=?");
-            statement.setString(1, code);
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            return dsl.fetchExists(dsl.selectFrom(STAFFOG_LINKCODE)
+                    .where(STAFFOG_LINKCODE.CODE.eq(code)));
 
-            ResultSet rs = statement.executeQuery();
-
-            return rs.next();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -130,15 +129,18 @@ public class SecurityManager {
     public String doesPlayerHaveLinkCode(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_linkcode` WHERE `uuid`=?");
-            statement.setString(1, uuid.toString());
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            StaffogLinkcodeRecord record = dsl.select(STAFFOG_LINKCODE.asterisk())
+                    .from(STAFFOG_LINKCODE)
+                    .where(STAFFOG_LINKCODE.UUID.eq(uuid.toString()))
+                    .fetchOneInto(STAFFOG_LINKCODE);
 
-            ResultSet rs = statement.executeQuery();
-
-            if (!rs.next())
+            if (record == null) {
                 return null;
+            }
 
-            return rs.getString("code");
+            return record.getCode();
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -165,15 +167,13 @@ public class SecurityManager {
         }
 
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO `staffog_linkcode` (`uuid`, `code`, `admin`) VALUES (?, ?, ?)"
-            );
-            statement.setString(1, uuid.toString());
-            statement.setString(2, code);
-            statement.setInt(3, (admin ? 1 : 0));
 
-
-            statement.executeUpdate();
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            dsl.insertInto(STAFFOG_LINKCODE)
+                    .set(STAFFOG_LINKCODE.UUID, uuid.toString())
+                    .set(STAFFOG_LINKCODE.CODE, code)
+                    .set(STAFFOG_LINKCODE.ADMIN, admin)
+                    .execute();
 
         } catch (Exception e) {
             Console.error("Failed to create link code.");
@@ -187,20 +187,22 @@ public class SecurityManager {
     public void checkAndDeactivateStaffAccount(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_web` WHERE `uuid`=?");
-            statement.setString(1, uuid.toString());
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
 
-            ResultSet rs = statement.executeQuery();
+            StaffogWebRecord record = dsl.select(STAFFOG_WEB.asterisk())
+                    .from(STAFFOG_WEB)
+                    .where(STAFFOG_WEB.UUID.eq(uuid.toString()))
+                    .fetchOneInto(STAFFOG_WEB);
 
-            if (!rs.next())
+            if (record == null)
                 return;
 
-            PreparedStatement updateStatement = connection.prepareStatement("UPDATE `staffog_web` SET `active`=0 WHERE `uuid`=? ");
-            updateStatement.setString(1, uuid.toString());
-            updateStatement.executeUpdate();
+            dsl.update(STAFFOG_WEB)
+                    .set(STAFFOG_WEB.ACTIVE, false)
+                    .where(STAFFOG_WEB.UUID.eq(uuid.toString()))
+                    .execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 }

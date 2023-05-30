@@ -19,6 +19,9 @@ public class StaffOGPlugin extends JavaPlugin {
     public void onEnable() {
         Console.info("Setting up Staff-OG...");
 
+        // Tell JOOQ to STFU
+        System.setProperty("org.jooq.no-tips", "true");
+
         this.saveDefaultConfig();
 
         if (!setupVaultPerms()) {

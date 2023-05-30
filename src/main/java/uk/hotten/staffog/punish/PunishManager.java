@@ -4,9 +4,14 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jooq.DSLContext;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import uk.hotten.staffog.data.DatabaseManager;
+import uk.hotten.staffog.data.jooq.tables.StaffogChatreport;
+import uk.hotten.staffog.data.jooq.tables.records.StaffogChatreportRecord;
 import uk.hotten.staffog.punish.data.ChatReportEntry;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
@@ -23,12 +28,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_CHATREPORT;
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_KICK;
+
 public class PunishManager {
 
     @Getter private JavaPlugin plugin;
     @Getter private static PunishManager instance;
 
     @Getter private ArrayList<ChatReportEntry> chatReportEntries;
+
 
     public PunishManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -280,16 +289,14 @@ public class PunishManager {
 
     public void newKickPunishment(KickPunishEntry entry) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO `staffog_kick` (`uuid`, `reason`, `by_uuid`, `by_name`, `time`) VALUES (?, ?, ?, ?, ?)"
-            );
-            statement.setString(1, entry.getUuid().toString());
-            statement.setString(2, entry.getReason());
-            statement.setString(3, entry.getByUuid().toString());
-            statement.setString(4, entry.getByName());
-            statement.setLong(5, entry.getTime());
-
-            statement.executeUpdate();
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            dsl.insertInto(STAFFOG_KICK)
+                    .set(STAFFOG_KICK.UUID, entry.getUuid().toString())
+                    .set(STAFFOG_KICK.REASON, entry.getReason())
+                    .set(STAFFOG_KICK.BY_UUID, entry.getByUuid())
+                    .set(STAFFOG_KICK.BY_NAME, entry.getByName())
+                    .set(STAFFOG_KICK.TIME, entry.getTime())
+                    .execute();
 
             if (entry.getPlayer() != null && entry.getPlayer().isOnline()) {
                 entry.getPlayer().kickPlayer(ChatColor.RED + "You have been kicked for:\n" +
@@ -331,7 +338,7 @@ public class PunishManager {
         String data = gson.toJson(chatReportEntries);
 
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
+/*            PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO `staffog_chatreport` (`uuid`, `by_uuid`, `time`, `messages`) VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
             );
@@ -348,9 +355,18 @@ public class PunishManager {
             ResultSet rs = statement.getGeneratedKeys();
             if (rs.next()) {
                 return "" + rs.getInt(1);
-            }
+            }*/
 
-            return null;
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            StaffogChatreportRecord result = dsl.insertInto(STAFFOG_CHATREPORT)
+                    .set(STAFFOG_CHATREPORT.UUID, reported.toString())
+                    .set(STAFFOG_CHATREPORT.BY_UUID, by.toString())
+                    .set(STAFFOG_CHATREPORT.TIME, System.currentTimeMillis())
+                    .set(STAFFOG_CHATREPORT.MESSAGES, data)
+                    .returning(STAFFOG_CHATREPORT.ID)
+                    .fetchOne();
+
+            return "" + result.getId();
 
         } catch (Exception e) {
             e.printStackTrace();
