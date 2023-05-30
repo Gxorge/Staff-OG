@@ -12,6 +12,7 @@ import org.jooq.impl.DSL;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.data.jooq.tables.StaffogChatreport;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogChatreportRecord;
+import uk.hotten.staffog.data.jooq.tables.records.StaffogHistoryRecord;
 import uk.hotten.staffog.punish.data.ChatReportEntry;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
@@ -28,8 +29,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_CHATREPORT;
-import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_KICK;
+import static uk.hotten.staffog.data.jooq.Tables.*;
 
 public class PunishManager {
 
@@ -50,7 +50,7 @@ public class PunishManager {
     public void checkNameToUuid(String name, UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            PreparedStatement statement = connection.prepareStatement("SELECT `id` FROM `staffog_history` WHERE `uuid`=? AND `name`=?");
+            /*PreparedStatement statement = connection.prepareStatement("SELECT `id` FROM `staffog_history` WHERE `uuid`=? AND `name`=?");
             statement.setString(1, uuid.toString());
             statement.setString(2, name);
             ResultSet rs = statement.executeQuery();
@@ -63,7 +63,24 @@ public class PunishManager {
             statement = connection.prepareStatement("INSERT INTO `staffog_history` (`uuid`, `name`) VALUE (?, ?)");
             statement.setString(1, uuid.toString());
             statement.setString(2, name);
-            statement.executeUpdate();
+            statement.executeUpdate();*/
+
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            StaffogHistoryRecord record = dsl.select(STAFFOG_HISTORY.ID)
+                    .from(STAFFOG_HISTORY)
+                    .where(STAFFOG_HISTORY.UUID.eq(uuid.toString()))
+                    .and(STAFFOG_HISTORY.NAME.eq(name))
+                    .fetchOneInto(STAFFOG_HISTORY);
+
+            if (record == null) {
+                Console.info("returniung");
+                return;
+            }
+
+            dsl.insertInto(STAFFOG_HISTORY)
+                    .set(STAFFOG_HISTORY.UUID, uuid.toString())
+                    .set(STAFFOG_HISTORY.NAME, name)
+                    .execute();
 
         } catch (Exception e) {
             Console.error("Failed to check username to uuid.");
