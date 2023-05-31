@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogBanRecord;

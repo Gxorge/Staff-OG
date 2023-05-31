@@ -3,14 +3,12 @@ package uk.hotten.staffog.data;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Console;
 
 import java.sql.*;
 
-import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_LINKCODE;
 import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_STAT;
 
 public class DatabaseManager {
