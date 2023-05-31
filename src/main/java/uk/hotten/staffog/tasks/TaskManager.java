@@ -42,7 +42,7 @@ public class TaskManager {
         try (Connection connection = DatabaseManager.getInstance().createConnection()){
             ArrayList<TaskEntry> toReturn = new ArrayList<>();
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             Result<StaffogTaskRecord> result = dsl.select(Tables.STAFFOG_TASK.asterisk())
                     .from(Tables.STAFFOG_TASK)
                     .fetchInto(Tables.STAFFOG_TASK);
@@ -74,7 +74,7 @@ public class TaskManager {
 
     private void deleteTask(int id) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()){
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             dsl.delete(Tables.STAFFOG_TASK)
                     .where(Tables.STAFFOG_TASK.ID.eq(id))
                     .execute();

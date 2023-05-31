@@ -46,7 +46,7 @@ public class PunishManager {
     public void checkNameToUuid(String name, UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
 
             boolean exists = dsl.fetchExists(dsl.select(STAFFOG_HISTORY.ID)
                     .from(STAFFOG_HISTORY)
@@ -71,7 +71,7 @@ public class PunishManager {
     public String getNameFromUUID(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
 
             return dsl.select(STAFFOG_HISTORY.NAME)
                     .from(STAFFOG_HISTORY)
@@ -90,7 +90,7 @@ public class PunishManager {
     public UUID getUUIDFromName(String name) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             String uuidString = dsl.select(STAFFOG_HISTORY.UUID)
                     .from(STAFFOG_HISTORY)
                     .where(STAFFOG_HISTORY.NAME.eq(name))
@@ -113,7 +113,7 @@ public class PunishManager {
     public void newPunishment(PunishEntry entry) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             if (entry.getType() == PunishType.BAN) {
                 dsl.insertInto(STAFFOG_BAN)
                         .set(STAFFOG_BAN.UUID, entry.getUuid().toString())
@@ -171,7 +171,7 @@ public class PunishManager {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
             PunishEntry entry = new PunishEntry(type);
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             if (type == PunishType.BAN) {
                 StaffogBanRecord record = dsl.select(STAFFOG_BAN.asterisk())
                         .from(STAFFOG_BAN)
@@ -241,7 +241,7 @@ public class PunishManager {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
             PunishEntry entry = new PunishEntry(type);
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             if (type == PunishType.BAN) {
                 StaffogBanRecord record = dsl.select(STAFFOG_BAN.asterisk())
                         .from(STAFFOG_BAN)
@@ -313,7 +313,7 @@ public class PunishManager {
             if (entry.getName() == null)
                 entry.setName(getNameFromUUID(entry.getUuid()));
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             if (entry.getType() == PunishType.BAN) {
                 dsl.update(STAFFOG_BAN)
                         .set(STAFFOG_BAN.REMOVED_UUID, entry.getRemovedUuid())
@@ -356,7 +356,7 @@ public class PunishManager {
 
     public void newKickPunishment(KickPunishEntry entry) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             dsl.insertInto(STAFFOG_KICK)
                     .set(STAFFOG_KICK.UUID, entry.getUuid().toString())
                     .set(STAFFOG_KICK.REASON, entry.getReason())
@@ -406,7 +406,7 @@ public class PunishManager {
 
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             StaffogChatreportRecord result = dsl.insertInto(STAFFOG_CHATREPORT)
                     .set(STAFFOG_CHATREPORT.UUID, reported.toString())
                     .set(STAFFOG_CHATREPORT.BY_UUID, by.toString())

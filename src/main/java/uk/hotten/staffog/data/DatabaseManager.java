@@ -209,7 +209,7 @@ public class DatabaseManager {
     private boolean doesStatIncludeEntry(String entry) {
         try (Connection connection = createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             return dsl.fetchExists(dsl.selectFrom(STAFFOG_STAT)
                     .where(STAFFOG_STAT.NAME.eq(entry)));
         } catch (Exception e) {
@@ -221,7 +221,7 @@ public class DatabaseManager {
     public void setStatEntry(String entry, String stat) {
         try (Connection connection = createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             if (!doesStatIncludeEntry(entry)) {
                 dsl.insertInto(STAFFOG_STAT)
                         .set(STAFFOG_STAT.NAME, entry)

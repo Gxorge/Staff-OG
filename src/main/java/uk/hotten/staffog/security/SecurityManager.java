@@ -36,7 +36,7 @@ public class SecurityManager {
     public StaffIPInfo isIpRecognised(UUID uuid, String ip) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             StaffogStaffipRecord record = dsl.select(STAFFOG_STAFFIP.asterisk())
                     .from(STAFFOG_STAFFIP)
                     .where(STAFFOG_STAFFIP.UUID.eq(uuid.toString()))
@@ -64,7 +64,7 @@ public class SecurityManager {
     public boolean hasUUIDGotIp(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             return dsl.fetchExists(dsl.selectFrom(STAFFOG_STAFFIP)
                     .where(STAFFOG_STAFFIP.UUID.eq(uuid.toString())));
 
@@ -77,7 +77,7 @@ public class SecurityManager {
     public void createIpEntry(StaffIPInfo info) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             dsl.insertInto(STAFFOG_STAFFIP)
                     .set(STAFFOG_STAFFIP.IP, info.getIp())
                     .set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
@@ -96,7 +96,7 @@ public class SecurityManager {
     public void updateIpEntry(StaffIPInfo info) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             dsl.update(STAFFOG_STAFFIP)
                     .set(STAFFOG_STAFFIP.IP, info.getIp())
                     .set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
@@ -116,7 +116,7 @@ public class SecurityManager {
     private boolean doesLinkCodeExist(String code) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             return dsl.fetchExists(dsl.selectFrom(STAFFOG_LINKCODE)
                     .where(STAFFOG_LINKCODE.CODE.eq(code)));
 
@@ -129,7 +129,7 @@ public class SecurityManager {
     public String doesPlayerHaveLinkCode(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             StaffogLinkcodeRecord record = dsl.select(STAFFOG_LINKCODE.asterisk())
                     .from(STAFFOG_LINKCODE)
                     .where(STAFFOG_LINKCODE.UUID.eq(uuid.toString()))
@@ -168,7 +168,7 @@ public class SecurityManager {
 
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
             dsl.insertInto(STAFFOG_LINKCODE)
                     .set(STAFFOG_LINKCODE.UUID, uuid.toString())
                     .set(STAFFOG_LINKCODE.CODE, code)
@@ -187,7 +187,7 @@ public class SecurityManager {
     public void checkAndDeactivateStaffAccount(UUID uuid) {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            DSLContext dsl = DSL.using(connection);
 
             StaffogWebRecord record = dsl.select(STAFFOG_WEB.asterisk())
                     .from(STAFFOG_WEB)
