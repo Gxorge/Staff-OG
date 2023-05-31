@@ -2,10 +2,16 @@ package uk.hotten.staffog.data;
 
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Console;
 
 import java.sql.*;
+
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_LINKCODE;
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_STAT;
 
 public class DatabaseManager {
 
@@ -202,12 +208,10 @@ public class DatabaseManager {
 
     private boolean doesStatIncludeEntry(String entry) {
         try (Connection connection = createConnection()) {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM `staffog_stat` WHERE `name`=?");
-            statement.setString(1, entry);
 
-            ResultSet rs = statement.executeQuery();
-
-            return rs.next();
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
+            return dsl.fetchExists(dsl.selectFrom(STAFFOG_STAT)
+                    .where(STAFFOG_STAT.NAME.eq(entry)));
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -217,16 +221,17 @@ public class DatabaseManager {
     public void setStatEntry(String entry, String stat) {
         try (Connection connection = createConnection()) {
 
+            DSLContext dsl = DSL.using(connection, SQLDialect.MYSQL);
             if (!doesStatIncludeEntry(entry)) {
-                PreparedStatement statement = connection.prepareStatement("INSERT INTO `staffog_stat` (`name`, `stat`) VALUE (?, ?)");
-                statement.setString(1, entry);
-                statement.setString(2, stat);
-                statement.executeUpdate();
+                dsl.insertInto(STAFFOG_STAT)
+                        .set(STAFFOG_STAT.NAME, entry)
+                        .set(STAFFOG_STAT.STAT, stat)
+                        .execute();
             } else {
-                PreparedStatement statement = connection.prepareStatement("UPDATE `staffog_stat` SET `stat`=? WHERE `name`=?");
-                statement.setString(1, stat);
-                statement.setString(2, entry);
-                statement.executeUpdate();
+                dsl.update(STAFFOG_STAT)
+                        .set(STAFFOG_STAT.STAT, stat)
+                        .where(STAFFOG_STAT.NAME.eq(entry))
+                        .execute();
             }
 
         } catch (Exception e) {
