@@ -1,3 +1,7 @@
+reportWebAddress: "https://report.trueog.net"
+appealWebAddress: "https://appeal.trueog.net"
+
+sqlType: mariadb # Options: mariadb or mysql
 sqlHost: localhost
 sqlUsername: username
 sqlPassword: password

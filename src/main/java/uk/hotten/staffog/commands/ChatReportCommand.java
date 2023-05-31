@@ -13,6 +13,8 @@ import uk.hotten.staffog.security.SecurityManager;
 import uk.hotten.staffog.security.data.StaffIPInfo;
 import uk.hotten.staffog.utils.Message;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class ChatReportCommand implements CommandExecutor {
@@ -24,8 +26,8 @@ public class ChatReportCommand implements CommandExecutor {
             return true;
         }
 
-        if (args == null || args.length < 1) {
-            player.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /chatreport <player>"));
+        if (args == null || args.length < 2) {
+            player.sendMessage(Message.format(ChatColor.RED + "Correct Usage: /chatreport <player> <reason>"));
             return true;
         }
 
@@ -37,13 +39,29 @@ public class ChatReportCommand implements CommandExecutor {
 
         UUID reported = pm.getUUIDFromChatReport(args[0]);
 
-        String reportId = pm.exportChatReport(player.getUniqueId(), reported);
-        if (reportId == null) {
+        ArrayList<String> preReason = new ArrayList<>(Arrays.asList(args));
+        preReason.remove(0);
+        String reason = String.join(" ", preReason);
+
+        String chatReportId = pm.exportChatReport(player.getUniqueId(), reported);
+        if (chatReportId == null) {
             player.sendMessage(Message.format(ChatColor.RED + "Failed to generate chat report. Please try again."));
             return true;
         }
 
-        player.sendMessage(Message.format(ChatColor.GREEN + "Chat report successfully created. Please quote the report ID " + ChatColor.WHITE + "#" + reportId + ChatColor.GREEN + " to staff when required."));
+        String staffReportId = pm.createReportFromCR(player.getUniqueId(), reported, Integer.parseInt(chatReportId), reason);
+        if (staffReportId == null) {
+            player.sendMessage(Message.format(ChatColor.RED + "Failed to create a report to staff, however a chat log was successfully exported with ID " +
+                    ChatColor.WHITE + "#" + chatReportId + ChatColor.RED + ". Please create a manual report quoting this Chat Report ID on " +
+                    ChatColor.WHITE + StaffOGPlugin.getReportWebAddress()));
+        } else {
+            player.sendMessage(Message.format(ChatColor.GREEN + "Chat report successfully created. Your staff report reference is " +
+                    ChatColor.WHITE + "#" + staffReportId + ChatColor.GREEN + ". Your chat report ID is " +
+                    ChatColor.WHITE + "#" + chatReportId + ChatColor.GREEN + " and has been included in your report to staff."));
+            player.sendMessage(Message.format(ChatColor.DARK_GREEN + "You can check the status of your report at " +
+                    ChatColor.WHITE + StaffOGPlugin.getReportWebAddress()));
+        }
+
         return true;
     }
 }

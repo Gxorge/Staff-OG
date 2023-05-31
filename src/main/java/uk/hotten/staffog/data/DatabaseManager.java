@@ -16,12 +16,31 @@ public class DatabaseManager {
     @Getter private JavaPlugin plugin;
     @Getter private static DatabaseManager instance;
 
-    private String host, username, password, database;
+    private String driver, driverUrl, host, username, password, database;
     private int port;
 
     public DatabaseManager(JavaPlugin plugin) {
         this.plugin = plugin;
         instance = this;
+
+        String sqlType = plugin.getConfig().getString("sqlType");
+        if (sqlType == null) {
+            Console.error("NO SQL TYPE SELECTED. DEFAULTING TO MYSQL.");
+            driver = "com.mysql.jdbc.Driver";
+            driverUrl = "mysql";
+        } else {
+            if (sqlType.equalsIgnoreCase("mysql")) {
+                driver = "com.mysql.jdbc.Driver";
+                driverUrl = "mysql";
+            } else if (sqlType.equals("mariadb")) {
+                driver = "org.mariadb.jdbc.Driver";
+                driverUrl = "mariadb";
+            } else {
+                Console.error("INVALID SQL TYPE, PLEASE USE EITHER MYSQL OR MARIADB. DEFAULTING TO MYSQL.");
+                driver = "com.mysql.jdbc.Driver";
+                driverUrl = "mysql";
+            }
+        }
 
         host = plugin.getConfig().getString("sqlHost");
         username = plugin.getConfig().getString("sqlUsername");
@@ -47,8 +66,8 @@ public class DatabaseManager {
 
     public Connection createConnection() throws SQLException, ClassNotFoundException {
         synchronized (this) {
-            Class.forName("org.mariadb.jdbc.Driver");
-            return DriverManager.getConnection("jdbc:mariadb://" + host + ":" + port + "/" + database + "?userSSL=false", username, password);
+            Class.forName(driver);
+            return DriverManager.getConnection("jdbc:" + driverUrl + "://" + host + ":" + port + "/" + database + "?userSSL=false", username, password);
         }
     }
 

@@ -15,6 +15,9 @@ public class StaffOGPlugin extends JavaPlugin {
 
     @Getter private static Permission vaultPerms;
 
+    @Getter private static String reportWebAddress;
+    @Getter private static String appealWebAddress;
+
     @Override
     public void onEnable() {
         Console.info("Setting up Staff-OG...");
@@ -28,6 +31,9 @@ public class StaffOGPlugin extends JavaPlugin {
             Console.error("Vault not found. Plugin will be disabled.");
             getServer().getPluginManager().disablePlugin(this);
         }
+
+        reportWebAddress = this.getConfig().getString("reportWebAddress");
+        appealWebAddress = this.getConfig().getString("appealWebAddress");
 
         DatabaseManager databaseManager = new DatabaseManager(this);
         PunishManager punishManager = new PunishManager(this);

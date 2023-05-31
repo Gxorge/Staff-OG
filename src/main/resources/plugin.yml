@@ -13,8 +13,8 @@ commands:
     usage: /<command>
 
   chatreport:
-    description: Takes a snapshot of a player's messages, used for reporting chat offences.
-    usage: /<command> <player>
+    description: Report a player for a chat offence.
+    usage: /<command> <player> <reason>
 
   permban:
     description: Permanently ban a player.

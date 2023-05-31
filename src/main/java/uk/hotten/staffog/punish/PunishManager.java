@@ -11,6 +11,7 @@ import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogBanRecord;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogChatreportRecord;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogMuteRecord;
+import uk.hotten.staffog.data.jooq.tables.records.StaffogReportRecord;
 import uk.hotten.staffog.punish.data.ChatReportEntry;
 import uk.hotten.staffog.punish.data.KickPunishEntry;
 import uk.hotten.staffog.punish.data.PunishEntry;
@@ -406,7 +407,7 @@ public class PunishManager {
         try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
             DSLContext dsl = DSL.using(connection);
-            StaffogChatreportRecord result = dsl.insertInto(STAFFOG_CHATREPORT)
+            StaffogChatreportRecord record = dsl.insertInto(STAFFOG_CHATREPORT)
                     .set(STAFFOG_CHATREPORT.UUID, reported.toString())
                     .set(STAFFOG_CHATREPORT.BY_UUID, by.toString())
                     .set(STAFFOG_CHATREPORT.TIME, System.currentTimeMillis())
@@ -414,7 +415,29 @@ public class PunishManager {
                     .returning(STAFFOG_CHATREPORT.ID)
                     .fetchOne();
 
-            return "" + result.getId();
+            return "" + record.getId();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String createReportFromCR(UUID by, UUID reported, int crid, String reason) {
+        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+            DSLContext dsl = DSL.using(connection);
+            StaffogReportRecord record = dsl.insertInto(STAFFOG_REPORT)
+                    .set(STAFFOG_REPORT.UUID, reported.toString())
+                    .set(STAFFOG_REPORT.BY_UUID, by.toString())
+                    .set(STAFFOG_REPORT.TIME, System.currentTimeMillis())
+                    .set(STAFFOG_REPORT.TYPE, "CHAT")
+                    .set(STAFFOG_REPORT.REASON, reason)
+                    .set(STAFFOG_REPORT.CRID, crid)
+                    .returning(STAFFOG_REPORT.ID)
+                    .fetchOne();
+
+            return "" + record.getId();
 
         } catch (Exception e) {
             e.printStackTrace();
