@@ -55,9 +55,9 @@ public class ChatReportCommand implements CommandExecutor {
                     ChatColor.WHITE + "#" + chatReportId + ChatColor.RED + ". Please create a manual report quoting this Chat Report ID on " +
                     ChatColor.WHITE + StaffOGPlugin.getReportWebAddress()));
         } else {
-            player.sendMessage(Message.format(ChatColor.GREEN + "Chat report successfully created. Your staff report reference is " +
+            player.sendMessage(Message.format(ChatColor.GREEN + "Thanks for your report! Your report reference is " +
                     ChatColor.WHITE + "#" + staffReportId + ChatColor.GREEN + ". Your chat report ID is " +
-                    ChatColor.WHITE + "#" + chatReportId + ChatColor.GREEN + " and has been included in your report to staff."));
+                    ChatColor.WHITE + "#" + chatReportId + ChatColor.GREEN + " and has been included in your report."));
             player.sendMessage(Message.format(ChatColor.DARK_GREEN + "You can check the status of your report at " +
                     ChatColor.WHITE + StaffOGPlugin.getReportWebAddress()));
         }

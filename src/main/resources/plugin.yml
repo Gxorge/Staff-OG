@@ -20,6 +20,7 @@ commands:
     description: Permanently ban a player.
     permission: staffog.command.permban
     usage: /<command> <player> <reason>
+    aliases: [ban]
 
   tempban:
     description: Temporarily ban a player.
@@ -35,6 +36,7 @@ commands:
     description: Permanently mute a player.
     permission: staffog.command.permmute
     usage: /<command> <player> <reason>
+    aliases: [mute]
 
   tempmute:
     description: Temporarily mute a player.
