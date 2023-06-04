@@ -11,8 +11,11 @@ import uk.hotten.staffog.data.jooq.Tables;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogTaskRecord;
 import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.punish.data.PunishEntry;
+import uk.hotten.staffog.tasks.data.NewAppealTask;
+import uk.hotten.staffog.tasks.data.NewReportTask;
 import uk.hotten.staffog.tasks.data.TaskEntry;
 import uk.hotten.staffog.tasks.data.UnpunishTask;
+import uk.hotten.staffog.utils.Message;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -31,6 +34,14 @@ public class TaskManager {
                         processUnpunish(entry);
                         deleteTask(entry.getId());
                         break;
+                    }
+                    case "newreport": {
+                        processNewReport(entry);
+                        deleteTask(entry.getId());
+                    }
+                    case "newappeal": {
+                        processNewAppeal(entry);
+                        deleteTask(entry.getId());
                     }
                 }
             }
@@ -69,6 +80,24 @@ public class TaskManager {
         UnpunishTask task = gson.fromJson(entry.getData(), UnpunishTask.class);
         PunishEntry punishEntry = PunishManager.getInstance().getPunishment(task.getType(), task.getId());
         PunishManager.getInstance().visualRemovePunishment(punishEntry);
+    }
+
+    private void processNewReport(TaskEntry entry) {
+        if (!entry.getTask().equals("newreport"))
+            return;
+
+        Gson gson = new Gson();
+        NewReportTask task = gson.fromJson(entry.getData(), NewReportTask.class);
+        Message.staffBroadcast(Message.formatNotification("REPORT", "New " + task.getType() + " report #" + task.getId() + " by " + task.getBy() + " against " + task.getOffender()));
+    }
+
+    private void processNewAppeal(TaskEntry entry) {
+        if (!entry.getTask().equals("newappeal"))
+            return;
+
+        Gson gson = new Gson();
+        NewAppealTask task = gson.fromJson(entry.getData(), NewAppealTask.class);
+        Message.staffBroadcast(Message.formatNotification("APPEAL", "New " + task.getType().toLowerCase() + " appeal #" + task.getId() + " by " + task.getBy()));
     }
 
     private void deleteTask(int id) {

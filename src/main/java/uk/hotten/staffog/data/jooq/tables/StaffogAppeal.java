@@ -8,12 +8,12 @@ import java.util.function.Function;
 
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Function11;
+import org.jooq.Function12;
 import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
-import org.jooq.Row11;
+import org.jooq.Row12;
 import org.jooq.Schema;
 import org.jooq.SelectField;
 import org.jooq.Table;
@@ -79,6 +79,11 @@ public class StaffogAppeal extends TableImpl<StaffogAppealRecord> {
      * The column <code>staffog.staffog_appeal.reason</code>.
      */
     public final TableField<StaffogAppealRecord, String> REASON = createField(DSL.name("reason"), SQLDataType.VARCHAR(2048).nullable(false), this, "");
+
+    /**
+     * The column <code>staffog.staffog_appeal.evidence</code>.
+     */
+    public final TableField<StaffogAppealRecord, String> EVIDENCE = createField(DSL.name("evidence"), SQLDataType.VARCHAR(2048).nullable(false).defaultValue(DSL.inline("[]", SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>staffog.staffog_appeal.open</code>.
@@ -193,18 +198,18 @@ public class StaffogAppeal extends TableImpl<StaffogAppealRecord> {
     }
 
     // -------------------------------------------------------------------------
-    // Row11 type methods
+    // Row12 type methods
     // -------------------------------------------------------------------------
 
     @Override
-    public Row11<Integer, String, Long, String, Integer, String, Boolean, String, Boolean, Long, String> fieldsRow() {
-        return (Row11) super.fieldsRow();
+    public Row12<Integer, String, Long, String, Integer, String, String, Boolean, String, Boolean, Long, String> fieldsRow() {
+        return (Row12) super.fieldsRow();
     }
 
     /**
      * Convenience mapping calling {@link SelectField#convertFrom(Function)}.
      */
-    public <U> SelectField<U> mapping(Function11<? super Integer, ? super String, ? super Long, ? super String, ? super Integer, ? super String, ? super Boolean, ? super String, ? super Boolean, ? super Long, ? super String, ? extends U> from) {
+    public <U> SelectField<U> mapping(Function12<? super Integer, ? super String, ? super Long, ? super String, ? super Integer, ? super String, ? super String, ? super Boolean, ? super String, ? super Boolean, ? super Long, ? super String, ? extends U> from) {
         return convertFrom(Records.mapping(from));
     }
 
@@ -212,7 +217,7 @@ public class StaffogAppeal extends TableImpl<StaffogAppealRecord> {
      * Convenience mapping calling {@link SelectField#convertFrom(Class,
      * Function)}.
      */
-    public <U> SelectField<U> mapping(Class<U> toType, Function11<? super Integer, ? super String, ? super Long, ? super String, ? super Integer, ? super String, ? super Boolean, ? super String, ? super Boolean, ? super Long, ? super String, ? extends U> from) {
+    public <U> SelectField<U> mapping(Class<U> toType, Function12<? super Integer, ? super String, ? super Long, ? super String, ? super Integer, ? super String, ? super String, ? super Boolean, ? super String, ? super Boolean, ? super Long, ? super String, ? extends U> from) {
         return convertFrom(toType, Records.mapping(from));
     }
 }

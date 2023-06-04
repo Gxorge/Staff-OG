@@ -9,6 +9,7 @@ import java.util.function.Function;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Function7;
+import org.jooq.Identity;
 import org.jooq.Name;
 import org.jooq.Record;
 import org.jooq.Records;
@@ -52,7 +53,7 @@ public class StaffogStaffip extends TableImpl<StaffogStaffipRecord> {
     /**
      * The column <code>staffog.staffog_staffip.id</code>.
      */
-    public final TableField<StaffogStaffipRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<StaffogStaffipRecord, Integer> ID = createField(DSL.name("id"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>staffog.staffog_staffip.ip</code>.
@@ -120,6 +121,11 @@ public class StaffogStaffip extends TableImpl<StaffogStaffipRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Staffog.STAFFOG;
+    }
+
+    @Override
+    public Identity<StaffogStaffipRecord, Integer> getIdentity() {
+        return (Identity<StaffogStaffipRecord, Integer>) super.getIdentity();
     }
 
     @Override

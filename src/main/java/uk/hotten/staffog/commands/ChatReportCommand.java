@@ -60,6 +60,8 @@ public class ChatReportCommand implements CommandExecutor {
                     ChatColor.WHITE + "#" + chatReportId + ChatColor.GREEN + " and has been included in your report."));
             player.sendMessage(Message.format(ChatColor.DARK_GREEN + "You can check the status of your report at " +
                     ChatColor.WHITE + StaffOGPlugin.getReportWebAddress()));
+
+            Message.staffBroadcast(Message.formatNotification("REPORT", "New Mutable Offences report #" + staffReportId + " by " + player.getName() + " against " + args[0]));
         }
 
         return true;

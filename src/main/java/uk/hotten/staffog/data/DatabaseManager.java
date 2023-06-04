@@ -390,17 +390,18 @@ public class DatabaseManager {
             Statement statement = connection.createStatement();
 
             String sql = "CREATE TABLE `staffog_appeal` (" +
-                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
-                    " `uuid` varchar(36) NOT NULL," +
-                    " `time` bigint(20) NOT NULL," +
-                    " `type` varchar(128) NOT NULL," +
-                    " `pid` int(11) NOT NULL," +
-                    " `reason` varchar(2048) NOT NULL," +
+                    " `id` int NOT NULL AUTO_INCREMENT," +
+                    " `uuid` varchar(36) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `time` bigint NOT NULL," +
+                    " `type` varchar(128) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `pid` int NOT NULL," +
+                    " `reason` varchar(2048) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `evidence` varchar(2048) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '[]'," +
                     " `open` bit(1) NOT NULL DEFAULT b'1'," +
-                    " `assigned` varchar(36) DEFAULT NULL," +
+                    " `assigned` varchar(36) COLLATE utf8mb4_general_ci DEFAULT NULL," +
                     " `verdict` bit(1) DEFAULT NULL," +
-                    " `verdict_time` bigint(20) DEFAULT NULL," +
-                    " `comment` varchar(2048) DEFAULT NULL," +
+                    " `verdict_time` bigint DEFAULT NULL," +
+                    " `comment` varchar(2048) COLLATE utf8mb4_general_ci DEFAULT NULL," +
                     " PRIMARY KEY (`id`)" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
@@ -426,18 +427,19 @@ public class DatabaseManager {
             Statement statement = connection.createStatement();
 
             String sql = "CREATE TABLE `staffog_report` (" +
-                    " `id` int(11) NOT NULL AUTO_INCREMENT," +
-                    " `uuid` varchar(36) NOT NULL," +
-                    " `by_uuid` varchar(36) NOT NULL," +
-                    " `time` bigint(20) NOT NULL," +
-                    " `type` varchar(128) NOT NULL," +
-                    " `reason` varchar(2048) NOT NULL," +
-                    " `crid` int(11) DEFAULT NULL," +
+                    " `id` int NOT NULL AUTO_INCREMENT," +
+                    " `uuid` varchar(36) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `by_uuid` varchar(36) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `time` bigint NOT NULL," +
+                    " `type` varchar(128) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `reason` varchar(2048) COLLATE utf8mb4_general_ci NOT NULL," +
+                    " `evidence` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '[]'," +
+                    " `crid` int DEFAULT NULL," +
                     " `open` bit(1) NOT NULL DEFAULT b'1'," +
-                    " `assigned` varchar(36) DEFAULT NULL," +
+                    " `assigned` varchar(36) COLLATE utf8mb4_general_ci DEFAULT NULL," +
                     " `verdict` bit(1) DEFAULT NULL," +
-                    " `verdict_time` bigint(20) DEFAULT NULL," +
-                    " `comment` varchar(2048) DEFAULT NULL," +
+                    " `verdict_time` bigint DEFAULT NULL," +
+                    " `comment` varchar(2048) COLLATE utf8mb4_general_ci DEFAULT NULL," +
                     " PRIMARY KEY (`id`)" +
                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
