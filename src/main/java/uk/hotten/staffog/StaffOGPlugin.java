@@ -1,10 +1,16 @@
 package uk.hotten.staffog;
 
-import lombok.Getter;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import uk.hotten.staffog.commands.*;
+
+import lombok.Getter;
+import net.milkbowl.vault.permission.Permission;
+import uk.hotten.staffog.commands.ChatReportCommand;
+import uk.hotten.staffog.commands.KickCommand;
+import uk.hotten.staffog.commands.LinkPanelCommand;
+import uk.hotten.staffog.commands.PermPunishCommand;
+import uk.hotten.staffog.commands.TempPunishCommand;
+import uk.hotten.staffog.commands.UnpunishCommand;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.punish.PunishManager;
 import uk.hotten.staffog.security.SecurityManager;
@@ -13,59 +19,93 @@ import uk.hotten.staffog.utils.Console;
 
 public class StaffOGPlugin extends JavaPlugin {
 
-    @Getter private static Permission vaultPerms;
+	public static Permission getVaultPerms() {
+		return vaultPerms;
+	}
 
-    @Getter private static String reportWebAddress;
-    @Getter private static String appealWebAddress;
+	public static String getReportWebAddress() {
 
-    @Override
-    public void onEnable() {
-        Console.info("Setting up Staff-OG...");
+		return reportWebAddress;
 
-        // Tell JOOQ to STFU
-        System.setProperty("org.jooq.no-tips", "true");
+	}
 
-        this.saveDefaultConfig();
+	// Declare variable to hold class for passing.
+	private static StaffOGPlugin plugin;
 
-        if (!setupVaultPerms()) {
-            Console.error("Vault not found. Plugin will be disabled.");
-            getServer().getPluginManager().disablePlugin(this);
-        }
+	private static Permission vaultPerms;
 
-        reportWebAddress = this.getConfig().getString("reportWebAddress");
-        appealWebAddress = this.getConfig().getString("appealWebAddress");
+	private static String reportWebAddress;
+	@Getter private static String appealWebAddress;
 
-        DatabaseManager databaseManager = new DatabaseManager(this);
-        PunishManager punishManager = new PunishManager(this);
-        SecurityManager securityManager = new SecurityManager(this);
-        TaskManager taskManager = new TaskManager(this);
+	@Override
+	public void onEnable() {
 
-        getCommand("linkpanel").setExecutor(new LinkPanelCommand());
-        getCommand("chatreport").setExecutor(new ChatReportCommand());
+		Console.info("Setting up Staff-OG...");
 
-        getCommand("permban").setExecutor(new PermPunishCommand());
-        getCommand("tempban").setExecutor(new TempPunishCommand());
-        getCommand("unban").setExecutor(new UnpunishCommand());
-        getCommand("permmute").setExecutor(new PermPunishCommand());
-        getCommand("tempmute").setExecutor(new TempPunishCommand());
-        getCommand("unmute").setExecutor(new UnpunishCommand());
-        getCommand("kick").setExecutor(new KickCommand());
+		// Assign the plugin variable to the main class instance.
+		plugin = this;
 
-        databaseManager.setStatEntry("server_status", "online");
+		// Tell JOOQ to STFU
+		System.setProperty("org.jooq.no-tips", "true");
 
-        Console.info("Staff-OG is ready!");
-    }
+		this.saveDefaultConfig();
 
-    @Override
-    public void onDisable() {
-        DatabaseManager.getInstance().setStatEntry("server_status", "offline");
-        DatabaseManager.getInstance().setStatEntry("player_count", "0");
-        DatabaseManager.getInstance().setStatEntry("staff_count", "0");
-    }
+		if (! setupVaultPerms()) {
 
-    private boolean setupVaultPerms() {
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        vaultPerms = rsp.getProvider();
-        return vaultPerms != null;
-    }
+			Console.error("Vault not found. Plugin will be disabled.");
+			getServer().getPluginManager().disablePlugin(this);
+
+		}
+
+		reportWebAddress = this.getConfig().getString("reportWebAddress");
+		appealWebAddress = this.getConfig().getString("appealWebAddress");
+
+		DatabaseManager databaseManager = new DatabaseManager(this);
+		new PunishManager(this);
+		new SecurityManager(this);
+		new TaskManager(this);
+
+		getCommand("linkpanel").setExecutor(new LinkPanelCommand());
+		getCommand("chatreport").setExecutor(new ChatReportCommand());
+
+		getCommand("permban").setExecutor(new PermPunishCommand());
+		getCommand("tempban").setExecutor(new TempPunishCommand());
+		getCommand("unban").setExecutor(new UnpunishCommand());
+		getCommand("permmute").setExecutor(new PermPunishCommand());
+		getCommand("tempmute").setExecutor(new TempPunishCommand());
+		getCommand("unmute").setExecutor(new UnpunishCommand());
+		getCommand("kick").setExecutor(new KickCommand());
+
+		databaseManager.setStatEntry("server_status", "online");
+
+		Console.info("Staff-OG is ready!");
+
+	}
+
+	@Override
+	public void onDisable() {
+
+		DatabaseManager.getInstance().setStatEntry("server_status", "offline");
+		DatabaseManager.getInstance().setStatEntry("player_count", "0");
+		DatabaseManager.getInstance().setStatEntry("staff_count", "0");
+
+	}
+
+	private boolean setupVaultPerms() {
+
+		RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+		vaultPerms = rsp.getProvider();
+
+		return vaultPerms != null;
+
+	}
+
+	// Class constructor.
+	public static StaffOGPlugin getPlugin() {
+
+		// Pass instance of main to other classes.
+		return plugin;
+
+	}
+
 }

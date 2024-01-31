@@ -19,189 +19,256 @@ import static uk.hotten.staffog.data.jooq.Tables.*;
 
 public class SecurityManager {
 
-    @Getter private static SecurityManager instance;
-    private JavaPlugin plugin;
+	public HashMap<UUID, StaffIPInfo> getStaffIPInfos() {
 
-    @Getter private HashMap<UUID, StaffIPInfo> staffIPInfos;
+		return staffIPInfos;
 
-    public SecurityManager(JavaPlugin plugin) {
-        this.plugin = plugin;
-        instance = this;
-        staffIPInfos = new HashMap<>();
+	}
 
-        plugin.getServer().getPluginManager().registerEvents(new SecurityEventListener(), plugin);
-    }
+	public static SecurityManager getInstance() {
 
-    public StaffIPInfo isIpRecognised(UUID uuid, String ip) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+		return instance;
 
-            DSLContext dsl = DSL.using(connection);
-            StaffogStaffipRecord record = dsl.select(STAFFOG_STAFFIP.asterisk())
-                    .from(STAFFOG_STAFFIP)
-                    .where(STAFFOG_STAFFIP.UUID.eq(uuid.toString()))
-                    .and(STAFFOG_STAFFIP.IP.eq(ip))
-                    .fetchOneInto(STAFFOG_STAFFIP);
+	}
 
-            if (record == null)
-                return null;
+	private static SecurityManager instance;
+	private HashMap<UUID, StaffIPInfo> staffIPInfos;
 
-            return new StaffIPInfo(
-                    record.getId(),
-                    UUID.fromString(record.getUuid()),
-                    record.getIp(),
-                    record.getInitial(),
-                    record.getPanelAcknowledged(),
-                    record.getPanelVerified(),
-                    record.getGameVerified()
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	public SecurityManager(JavaPlugin plugin) {
 
-    public boolean hasUUIDGotIp(UUID uuid) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+		instance = this;
+		staffIPInfos = new HashMap<>();
 
-            DSLContext dsl = DSL.using(connection);
-            return dsl.fetchExists(dsl.selectFrom(STAFFOG_STAFFIP)
-                    .where(STAFFOG_STAFFIP.UUID.eq(uuid.toString())));
+		plugin.getServer().getPluginManager().registerEvents(new SecurityEventListener(), plugin);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+	}
 
-    public void createIpEntry(StaffIPInfo info) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+	public StaffIPInfo isIpRecognised(UUID uuid, String ip) {
 
-            DSLContext dsl = DSL.using(connection);
-            dsl.insertInto(STAFFOG_STAFFIP)
-                    .set(STAFFOG_STAFFIP.IP, info.getIp())
-                    .set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
-                    .set(STAFFOG_STAFFIP.INITIAL, info.isInitial())
-                    .set(STAFFOG_STAFFIP.PANEL_ACKNOWLEDGED, info.isPanelAcknowledged())
-                    .set(STAFFOG_STAFFIP.PANEL_VERIFIED, info.isPanelVerified())
-                    .set(STAFFOG_STAFFIP.GAME_VERIFIED, info.isGameVerified())
-                    .execute();
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-        } catch (Exception e) {
-            Console.error("Failed to create ip entry.");
-            e.printStackTrace();
-        }
-    }
+			DSLContext dsl = DSL.using(connection);
+			StaffogStaffipRecord record = dsl.select(STAFFOG_STAFFIP.asterisk())
+					.from(STAFFOG_STAFFIP)
+					.where(STAFFOG_STAFFIP.UUID.eq(uuid.toString()))
+					.and(STAFFOG_STAFFIP.IP.eq(ip))
+					.fetchOneInto(STAFFOG_STAFFIP);
 
-    public void updateIpEntry(StaffIPInfo info) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+			if (record == null) {
 
-            DSLContext dsl = DSL.using(connection);
-            dsl.update(STAFFOG_STAFFIP)
-                    .set(STAFFOG_STAFFIP.IP, info.getIp())
-                    .set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
-                    .set(STAFFOG_STAFFIP.INITIAL, info.isInitial())
-                    .set(STAFFOG_STAFFIP.PANEL_ACKNOWLEDGED, info.isPanelAcknowledged())
-                    .set(STAFFOG_STAFFIP.PANEL_VERIFIED, info.isPanelVerified())
-                    .set(STAFFOG_STAFFIP.GAME_VERIFIED, info.isGameVerified())
-                    .where(STAFFOG_STAFFIP.ID.eq(info.getId()))
-                    .execute();
+				return null;
 
-        } catch (Exception e) {
-            Console.error("Failed to update ip entry.");
-            e.printStackTrace();
-        }
-    }
+			}
 
-    private boolean doesLinkCodeExist(String code) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+			return new StaffIPInfo(
+					record.getId(),
+					UUID.fromString(record.getUuid()),
+					record.getIp(),
+					record.getInitial(),
+					record.getPanelAcknowledged(),
+					record.getPanelVerified(),
+					record.getGameVerified()
+					);
+		}
+		catch (Exception error) {
 
-            DSLContext dsl = DSL.using(connection);
-            return dsl.fetchExists(dsl.selectFrom(STAFFOG_LINKCODE)
-                    .where(STAFFOG_LINKCODE.CODE.eq(code)));
+			error.printStackTrace();
+			return null;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+		}
 
-    public String doesPlayerHaveLinkCode(UUID uuid) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+	}
 
-            DSLContext dsl = DSL.using(connection);
-            StaffogLinkcodeRecord record = dsl.select(STAFFOG_LINKCODE.asterisk())
-                    .from(STAFFOG_LINKCODE)
-                    .where(STAFFOG_LINKCODE.UUID.eq(uuid.toString()))
-                    .fetchOneInto(STAFFOG_LINKCODE);
+	public boolean hasUUIDGotIp(UUID uuid) {
 
-            if (record == null) {
-                return null;
-            }
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            return record.getCode();
+			DSLContext dsl = DSL.using(connection);
+			return dsl.fetchExists(dsl.selectFrom(STAFFOG_STAFFIP)
+					.where(STAFFOG_STAFFIP.UUID.eq(uuid.toString())));
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+		}
+		catch (Exception error) {
 
-    public String createLinkCode(UUID uuid, boolean admin) {
-        String code = "";
-        String possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                + "0123456789"
-                + "abcdefghijklmnopqrstuvxyz";
+			error.printStackTrace();
+			return false;
 
-        StringBuilder sb = new StringBuilder();
-        while (code.equals("")) {
-            for (int i = 0; i < 5; i++) {
-                int index = (int)(possibleChars.length() * Math.random());
+		}
 
-                // add Character one by one in end of sb
-                sb.append(possibleChars.charAt(index));
-            }
+	}
 
-            if (!doesLinkCodeExist(sb.toString()))
-                code = sb.toString();
-        }
+	public void createIpEntry(StaffIPInfo info) {
 
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            DSLContext dsl = DSL.using(connection);
-            dsl.insertInto(STAFFOG_LINKCODE)
-                    .set(STAFFOG_LINKCODE.UUID, uuid.toString())
-                    .set(STAFFOG_LINKCODE.CODE, code)
-                    .set(STAFFOG_LINKCODE.ADMIN, admin)
-                    .execute();
+			DSLContext dsl = DSL.using(connection);
+			dsl.insertInto(STAFFOG_STAFFIP)
+			.set(STAFFOG_STAFFIP.IP, info.getIp())
+			.set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
+			.set(STAFFOG_STAFFIP.INITIAL, info.isInitial())
+			.set(STAFFOG_STAFFIP.PANEL_ACKNOWLEDGED, info.isPanelAcknowledged())
+			.set(STAFFOG_STAFFIP.PANEL_VERIFIED, info.isPanelVerified())
+			.set(STAFFOG_STAFFIP.GAME_VERIFIED, info.isGameVerified())
+			.execute();
 
-        } catch (Exception e) {
-            Console.error("Failed to create link code.");
-            e.printStackTrace();
-            return null;
-        }
+		}
+		catch (Exception error) {
 
-        return code;
-    }
+			Console.error("Failed to create ip entry.");
+			error.printStackTrace();
 
-    public void checkAndDeactivateStaffAccount(UUID uuid) {
-        try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+		}
 
-            DSLContext dsl = DSL.using(connection);
+	}
 
-            StaffogWebRecord record = dsl.select(STAFFOG_WEB.asterisk())
-                    .from(STAFFOG_WEB)
-                    .where(STAFFOG_WEB.UUID.eq(uuid.toString()))
-                    .fetchOneInto(STAFFOG_WEB);
+	public void updateIpEntry(StaffIPInfo info) {
 
-            if (record == null)
-                return;
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
-            dsl.update(STAFFOG_WEB)
-                    .set(STAFFOG_WEB.ACTIVE, false)
-                    .where(STAFFOG_WEB.UUID.eq(uuid.toString()))
-                    .execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+			DSLContext dsl = DSL.using(connection);
+			dsl.update(STAFFOG_STAFFIP)
+			.set(STAFFOG_STAFFIP.IP, info.getIp())
+			.set(STAFFOG_STAFFIP.UUID, info.getUuid().toString())
+			.set(STAFFOG_STAFFIP.INITIAL, info.isInitial())
+			.set(STAFFOG_STAFFIP.PANEL_ACKNOWLEDGED, info.isPanelAcknowledged())
+			.set(STAFFOG_STAFFIP.PANEL_VERIFIED, info.isPanelVerified())
+			.set(STAFFOG_STAFFIP.GAME_VERIFIED, info.isGameVerified())
+			.where(STAFFOG_STAFFIP.ID.eq(info.getId()))
+			.execute();
+
+		}
+		catch (Exception error) {
+
+			Console.error("Failed to update ip entry.");
+			error.printStackTrace();
+
+		}
+
+	}
+
+	private boolean doesLinkCodeExist(String code) {
+
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+			DSLContext dsl = DSL.using(connection);
+			return dsl.fetchExists(dsl.selectFrom(STAFFOG_LINKCODE)
+					.where(STAFFOG_LINKCODE.CODE.eq(code)));
+
+		}
+		catch (Exception error) {
+
+			error.printStackTrace();
+			return false;
+
+		}
+
+	}
+
+	public String doesPlayerHaveLinkCode(UUID uuid) {
+
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+			DSLContext dsl = DSL.using(connection);
+			StaffogLinkcodeRecord record = dsl.select(STAFFOG_LINKCODE.asterisk())
+					.from(STAFFOG_LINKCODE)
+					.where(STAFFOG_LINKCODE.UUID.eq(uuid.toString()))
+					.fetchOneInto(STAFFOG_LINKCODE);
+
+			if (record == null) {
+
+				return null;
+
+			}
+
+			return record.getCode();
+
+		}
+		catch (Exception error) {
+
+			error.printStackTrace();
+			return null;
+
+		}
+
+	}
+
+	public String createLinkCode(UUID uuid, boolean admin) {
+
+		String code = "";
+		String possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+				+ "0123456789"
+				+ "abcdefghijklmnopqrstuvxyz";
+
+		StringBuilder sb = new StringBuilder();
+
+		while (code.equals("")) {
+
+			for (int i = 0; i < 5; i++) {
+
+				int index = (int)(possibleChars.length() * Math.random());
+
+				// add Character one by one in end of sb
+				sb.append(possibleChars.charAt(index));
+
+			}
+
+			if (! doesLinkCodeExist(sb.toString())) {
+
+				code = sb.toString();
+
+			}
+
+		}
+
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+			DSLContext dsl = DSL.using(connection);
+			dsl.insertInto(STAFFOG_LINKCODE)
+			.set(STAFFOG_LINKCODE.UUID, uuid.toString())
+			.set(STAFFOG_LINKCODE.CODE, code)
+			.set(STAFFOG_LINKCODE.ADMIN, admin)
+			.execute();
+
+		}
+		catch (Exception error) {
+
+			Console.error("Failed to create link code.");
+			error.printStackTrace();
+			return null;
+
+		}
+
+		return code;
+	}
+
+	public void checkAndDeactivateStaffAccount(UUID uuid) {
+
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+			DSLContext dsl = DSL.using(connection);
+
+			StaffogWebRecord record = dsl.select(STAFFOG_WEB.asterisk())
+					.from(STAFFOG_WEB)
+					.where(STAFFOG_WEB.UUID.eq(uuid.toString()))
+					.fetchOneInto(STAFFOG_WEB);
+
+			if (record == null) {
+
+				return;
+
+			}
+
+			dsl.update(STAFFOG_WEB)
+			.set(STAFFOG_WEB.ACTIVE, false)
+			.where(STAFFOG_WEB.UUID.eq(uuid.toString()))
+			.execute();
+		}
+		catch (Exception error) {
+
+			error.printStackTrace();
+
+		}
+
+	}
+
 }

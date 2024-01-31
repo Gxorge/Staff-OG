@@ -6,7 +6,15 @@ import java.util.UUID;
 
 public class ChatReportEntry {
 
-    @Getter private UUID uuid;
+    public UUID getUuid() {
+		return uuid;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	@Getter private UUID uuid;
     @Getter private String name;
     @Getter private String message;
     @Getter private long time;
