@@ -1,67 +1,93 @@
 package uk.hotten.staffog.punish.data;
 
+import java.util.Date;
+import java.util.UUID;
+
+import org.bukkit.entity.Player;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.entity.Player;
 import uk.hotten.staffog.utils.TimeUtils;
-
-import java.util.*;
 
 public class PunishEntry {
 
-    // None DB data
-    @Getter @Setter private PunishType type;
-    @Getter @Setter private Player player;
-    @Getter @Setter private String name;
+	// None DB data
+	@Getter @Setter private PunishType type;
+	@Getter @Setter private Player player;
+	@Getter @Setter private String name;
 
-    // Data stored in DB
-    @Getter @Setter private long id;
-    @Getter @Setter private UUID uuid;
-    @Getter @Setter private String reason;
+	// Data stored in DB
+	@Getter @Setter private long id;
+	@Getter @Setter private UUID uuid;
+	@Getter @Setter private String reason;
 
-    @Getter @Setter private String byUuid;
-    @Getter @Setter private String byName;
+	@Getter @Setter private String byUuid;
+	@Getter @Setter private String byName;
 
-    @Getter @Setter private String removedUuid;
-    @Getter @Setter private String removedName;
-    @Getter @Setter private String removedReason;
-    @Getter @Setter private long removedTime;
+	@Getter @Setter private String removedUuid;
+	@Getter @Setter private String removedName;
+	@Getter @Setter private String removedReason;
+	@Getter @Setter private long removedTime;
 
-    @Getter @Setter private long time;
-    @Getter @Setter private long until;
+	@Getter @Setter private long time;
+	@Getter @Setter private long until;
 
-    @Getter @Setter private boolean active;
+	@Getter @Setter private boolean active;
 
-    public PunishEntry(PunishType type) {
-        this.type = type;
-    }
+	public PunishEntry(PunishType type) {
 
-    public long calculateDuration() {
-        if (until == -1)
-            return -1;
+		this.type = type;
 
-        return until - time;
-    }
+	}
 
-    public long calculateRemaining() {
-        if (until == -1)
-            return -1;
+	public long calculateDuration() {
 
-        return until - System.currentTimeMillis();
-    }
+		if (until == -1) {
 
-    public boolean checkDurationOver() {
-        if (until == -1)
-            return false;
+			return -1;
 
-        return (calculateRemaining() <= 0);
-    }
+		}
 
-    public String calculateUntilDate() {
-        if (until == -1)
-            return "forever";
+		return until - time;
 
-        Date date = new Date(until);
-        return TimeUtils.notificationTimeFormat.format(date);
-    }
+	}
+
+	public long calculateRemaining() {
+
+		if (until == -1) {
+
+			return -1;
+
+		}
+
+		return until - System.currentTimeMillis();
+
+	}
+
+	public boolean checkDurationOver() {
+
+		if (until == -1) {
+
+			return false;
+
+		}
+
+		return (calculateRemaining() <= 0);
+
+	}
+
+	public String calculateUntilDate() {
+
+		if (until == -1) {
+
+			return "forever";
+
+		}
+
+		Date date = new Date(until);
+
+		return TimeUtils.notificationTimeFormat.format(date);
+
+	}
+
 }
