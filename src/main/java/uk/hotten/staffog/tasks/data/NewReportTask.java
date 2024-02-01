@@ -5,21 +5,9 @@ import lombok.Setter;
 
 public class NewReportTask {
 
-    public String getOffender() {
-		return offender;
-	}
-	public String getBy() {
-		return by;
-	}
-	public int getId() {
-		return id;
-	}
-	public String getType() {
-		return type;
-	}
 	@Getter @Setter private int id;
-    @Getter @Setter private String offender;
-    @Getter @Setter private String by;
-    @Getter @Setter private String type;
+	@Getter @Setter private String offender;
+	@Getter @Setter private String by;
+	@Getter @Setter private String type;
 
 }

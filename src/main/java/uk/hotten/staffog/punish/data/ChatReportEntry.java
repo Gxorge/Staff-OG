@@ -1,31 +1,23 @@
 package uk.hotten.staffog.punish.data;
 
-import lombok.Getter;
-
 import java.util.UUID;
+
+import lombok.Getter;
 
 public class ChatReportEntry {
 
-    public UUID getUuid() {
-		return uuid;
-	}
-
-	public String getName() {
-		return name;
-	}
-
 	@Getter private UUID uuid;
-    @Getter private String name;
-    @Getter private String message;
-    @Getter private long time;
+	@Getter private String name;
+	@Getter private String message;
+	@Getter private long time;
 
-    public ChatReportEntry(UUID uuid, String name, String message, long time) {
-        this.uuid = uuid;
-        this.name = name;
-        this.message = message;
-        this.time = time;
-    }
+	public ChatReportEntry(UUID uuid, String name, String message, long time) {
 
-    public ChatReportEntry() { }
+		this.uuid = uuid;
+		this.name = name;
+		this.message = message;
+		this.time = time;
+
+	}
 
 }

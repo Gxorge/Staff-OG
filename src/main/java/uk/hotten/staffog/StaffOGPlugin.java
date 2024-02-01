@@ -19,23 +19,13 @@ import uk.hotten.staffog.utils.Console;
 
 public class StaffOGPlugin extends JavaPlugin {
 
-	public static Permission getVaultPerms() {
-		return vaultPerms;
-	}
-
-	public static String getReportWebAddress() {
-
-		return reportWebAddress;
-
-	}
-
 	// Declare variable to hold class for passing.
 	private static StaffOGPlugin plugin;
 
-	private static Permission vaultPerms;
+    @Getter private static Permission vaultPerms;
 
-	private static String reportWebAddress;
-	@Getter private static String appealWebAddress;
+    @Getter private static String reportWebAddress;
+    @Getter private static String appealWebAddress;
 
 	@Override
 	public void onEnable() {

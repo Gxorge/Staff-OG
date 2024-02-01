@@ -5,17 +5,8 @@ import lombok.Setter;
 
 public class NewAppealTask {
 
-    public int getId() {
-		return id;
-	}
-	public String getBy() {
-		return by;
-	}
-	public String getType() {
-		return type;
-	}
 	@Getter @Setter private int id;
-    @Getter @Setter private String by;
-    @Getter @Setter private String type;
+	@Getter @Setter private String by;
+	@Getter @Setter private String type;
 
 }

@@ -13,21 +13,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 
+import lombok.Getter;
 import uk.hotten.staffog.punish.data.PunishType;
 import uk.hotten.staffog.utils.Console;
 
 public class DatabaseManager {
 
-	private static JavaPlugin plugin;
-	
-	public static JavaPlugin getPlugin() {
-		return plugin;
-	}
+    @Getter private static JavaPlugin plugin;
+    @Getter private static DatabaseManager instance;
 
-	private static DatabaseManager instance;
-
-	private String driver, driverUrl, host, username, password, database;
-	private int port;
+    private String driver, driverUrl, host, username, password, database;
+    private int port;
 
 	public DatabaseManager(JavaPlugin plugin) {
 		DatabaseManager.plugin = plugin;
@@ -72,10 +68,6 @@ public class DatabaseManager {
 		checkAppealTable();
 		checkReportTable();
 		checkChatReportTable();
-	}
-
-	public static DatabaseManager getInstance() {
-		return instance;
 	}
 
 	public Connection createConnection() throws SQLException, ClassNotFoundException {
@@ -490,9 +482,10 @@ public class DatabaseManager {
 			statement.executeUpdate(sql);
 			Console.info("Created 'staffog_chatreport' table, was missing.");
 
-		} catch (Exception e) {
+		}
+		catch (Exception error) {
 			Console.error("Failed to check 'staffog_chatreport' table.");
-			e.printStackTrace();
+			error.printStackTrace();
 		}
 	}
 }

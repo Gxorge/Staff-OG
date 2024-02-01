@@ -46,4 +46,5 @@ public class DataEventListener implements Listener {
 		dbm.setStatEntry("staff_count", String.valueOf(amount));
 
 	}
+
 }

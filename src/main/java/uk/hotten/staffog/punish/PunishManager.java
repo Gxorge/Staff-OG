@@ -18,6 +18,7 @@ import org.jooq.impl.DSL;
 
 import com.google.gson.Gson;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import uk.hotten.staffog.data.DatabaseManager;
@@ -36,29 +37,10 @@ import uk.hotten.staffog.utils.TimeUtils;
 
 public class PunishManager {
 
-	private JavaPlugin plugin;
+	@Getter private JavaPlugin plugin;
+	@Getter private static PunishManager instance;
 
-	public JavaPlugin getPlugin() {
-
-		return plugin;
-
-	}
-
-	public ArrayList<ChatReportEntry> getChatReportEntries() {
-
-		return chatReportEntries;
-
-	}
-
-	private static PunishManager instance;
-
-	public static PunishManager getInstance() {
-
-		return instance;
-
-	}
-
-	private ArrayList<ChatReportEntry> chatReportEntries;
+	@Getter private ArrayList<ChatReportEntry> chatReportEntries;
 
 	public PunishManager(JavaPlugin plugin) {
 		this.plugin = plugin;
@@ -108,9 +90,9 @@ public class PunishManager {
 					.limit(1)
 					.fetchOne(STAFFOG_HISTORY.NAME);
 
-		} catch (Exception e) {
+		} catch (Exception error) {
 			Console.error("Failed to get name from uuid. " + uuid.toString());
-			e.printStackTrace();
+			error.printStackTrace();
 			return null;
 		}
 	}
@@ -131,9 +113,9 @@ public class PunishManager {
 
 			return UUID.fromString(uuidString);
 
-		} catch (Exception e) {
+		} catch (Exception error) {
 			Console.error("Failed to get name from name. " + name);
-			e.printStackTrace();
+			error.printStackTrace();
 			return null;
 		}
 	}
@@ -198,9 +180,10 @@ public class PunishManager {
 
 			SecurityManager.getInstance().checkAndDeactivateStaffAccount(entry.getUuid());
 
-		} catch (Exception e) {
+		}
+		catch (Exception error) {
 			Console.error("Failed to create punishment.");
-			e.printStackTrace();
+			error.printStackTrace();
 		}
 	}
 
@@ -215,8 +198,11 @@ public class PunishManager {
 						.where(STAFFOG_BAN.ID.eq((long) id))
 						.fetchOneInto(STAFFOG_BAN);
 
-				if (record == null)
+				if (record == null) {
+
 					return null;
+
+				}
 
 				entry.setId(record.getId());
 				entry.setUuid(UUID.fromString(record.getUuid()));
@@ -251,7 +237,7 @@ public class PunishManager {
 				entry.setTime(record.getTime());
 				entry.setUntil(record.getUntil());
 				entry.setActive(record.getActive());
-				if (!entry.isActive()) {
+				if (! entry.isActive()) {
 					entry.setRemovedUuid(record.getRemovedUuid());
 					entry.setRemovedName(record.getRemovedName());
 					entry.setRemovedTime(record.getRemovedTime());
@@ -267,9 +253,9 @@ public class PunishManager {
 			return entry;
 
 
-		} catch (Exception e) {
+		} catch (Exception error) {
 			Console.error("Failed to get punishment info for id " + id);
-			e.printStackTrace();
+			error.printStackTrace();
 			return null;
 		}
 	}
@@ -327,9 +313,10 @@ public class PunishManager {
 			return entry;
 
 
-		} catch (Exception e) {
+		}
+		catch (Exception error) {
 			Console.error("Failed to get punishment info for " + uuid);
-			e.printStackTrace();
+			error.printStackTrace();
 			return null;
 		}
 	}
@@ -476,8 +463,9 @@ public class PunishManager {
 
 			return "" + record.getId();
 
-		} catch (Exception e) {
-			e.printStackTrace();
+		}
+		catch (Exception error) {
+			error.printStackTrace();
 			return null;
 		}
 	}
@@ -498,9 +486,12 @@ public class PunishManager {
 
 			return "" + record.getId();
 
-		} catch (Exception e) {
-			e.printStackTrace();
+		}
+		catch (Exception error) {
+			error.printStackTrace();
 			return null;
 		}
+
 	}
+
 }

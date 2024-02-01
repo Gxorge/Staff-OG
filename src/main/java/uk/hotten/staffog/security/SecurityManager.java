@@ -1,9 +1,18 @@
 package uk.hotten.staffog.security;
 
-import lombok.Getter;
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_LINKCODE;
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_STAFFIP;
+import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_WEB;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.UUID;
+
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+
+import lombok.Getter;
 import uk.hotten.staffog.data.DatabaseManager;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogLinkcodeRecord;
 import uk.hotten.staffog.data.jooq.tables.records.StaffogStaffipRecord;
@@ -11,40 +20,19 @@ import uk.hotten.staffog.data.jooq.tables.records.StaffogWebRecord;
 import uk.hotten.staffog.security.data.StaffIPInfo;
 import uk.hotten.staffog.utils.Console;
 
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.UUID;
-
-import static uk.hotten.staffog.data.jooq.Tables.*;
-
 public class SecurityManager {
 
-	public HashMap<UUID, StaffIPInfo> getStaffIPInfos() {
-
-		return staffIPInfos;
-
-	}
-
-	public static SecurityManager getInstance() {
-
-		return instance;
-
-	}
-
-	private static SecurityManager instance;
-	private HashMap<UUID, StaffIPInfo> staffIPInfos;
+	@Getter private static SecurityManager instance;
+	@Getter private HashMap<UUID, StaffIPInfo> staffIPInfos;
 
 	public SecurityManager(JavaPlugin plugin) {
-
 		instance = this;
 		staffIPInfos = new HashMap<>();
 
 		plugin.getServer().getPluginManager().registerEvents(new SecurityEventListener(), plugin);
-
 	}
 
 	public StaffIPInfo isIpRecognised(UUID uuid, String ip) {
-
 		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
 			DSLContext dsl = DSL.using(connection);
@@ -71,16 +59,12 @@ public class SecurityManager {
 					);
 		}
 		catch (Exception error) {
-
 			error.printStackTrace();
 			return null;
-
 		}
-
 	}
 
 	public boolean hasUUIDGotIp(UUID uuid) {
-
 		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
 			DSLContext dsl = DSL.using(connection);
@@ -89,16 +73,12 @@ public class SecurityManager {
 
 		}
 		catch (Exception error) {
-
 			error.printStackTrace();
 			return false;
-
 		}
-
 	}
 
 	public void createIpEntry(StaffIPInfo info) {
-
 		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
 			DSLContext dsl = DSL.using(connection);
@@ -113,16 +93,12 @@ public class SecurityManager {
 
 		}
 		catch (Exception error) {
-
 			Console.error("Failed to create ip entry.");
 			error.printStackTrace();
-
 		}
-
 	}
 
 	public void updateIpEntry(StaffIPInfo info) {
-
 		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
 			DSLContext dsl = DSL.using(connection);
@@ -138,16 +114,12 @@ public class SecurityManager {
 
 		}
 		catch (Exception error) {
-
 			Console.error("Failed to update ip entry.");
 			error.printStackTrace();
-
 		}
-
 	}
 
 	private boolean doesLinkCodeExist(String code) {
-
 		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
 			DSLContext dsl = DSL.using(connection);
@@ -156,16 +128,12 @@ public class SecurityManager {
 
 		}
 		catch (Exception error) {
-
 			error.printStackTrace();
 			return false;
-
 		}
-
 	}
 
 	public String doesPlayerHaveLinkCode(UUID uuid) {
-
 		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
 
 			DSLContext dsl = DSL.using(connection);
@@ -184,12 +152,9 @@ public class SecurityManager {
 
 		}
 		catch (Exception error) {
-
 			error.printStackTrace();
 			return null;
-
 		}
-
 	}
 
 	public String createLinkCode(UUID uuid, boolean admin) {
@@ -200,7 +165,6 @@ public class SecurityManager {
 				+ "abcdefghijklmnopqrstuvxyz";
 
 		StringBuilder sb = new StringBuilder();
-
 		while (code.equals("")) {
 
 			for (int i = 0; i < 5; i++) {
@@ -231,14 +195,13 @@ public class SecurityManager {
 
 		}
 		catch (Exception error) {
-
 			Console.error("Failed to create link code.");
 			error.printStackTrace();
 			return null;
-
 		}
 
 		return code;
+
 	}
 
 	public void checkAndDeactivateStaffAccount(UUID uuid) {
@@ -252,16 +215,14 @@ public class SecurityManager {
 					.where(STAFFOG_WEB.UUID.eq(uuid.toString()))
 					.fetchOneInto(STAFFOG_WEB);
 
-			if (record == null) {
-
+			if (record == null)
 				return;
-
-			}
 
 			dsl.update(STAFFOG_WEB)
 			.set(STAFFOG_WEB.ACTIVE, false)
 			.where(STAFFOG_WEB.UUID.eq(uuid.toString()))
 			.execute();
+
 		}
 		catch (Exception error) {
 
