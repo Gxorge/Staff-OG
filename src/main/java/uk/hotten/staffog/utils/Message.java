@@ -1,6 +1,7 @@
 package uk.hotten.staffog.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import net.kyori.adventure.text.TextComponent;
@@ -24,16 +25,16 @@ public class Message {
 
 		Bukkit.getServer().getOnlinePlayers().forEach(p -> {
 
-			if (p.hasPermission("staffog.seebroadcast")) p.sendMessage(message);
+			if (p.hasPermission("staffog.seebroadcast")) staffOGMessage(p, message);
 
 		});
 
-		Bukkit.getServer().getConsoleSender().sendMessage(message);
+		staffOGMessage(Bukkit.getServer().getConsoleSender(), message);
 
 	}
 
 	// Sends a formatted message to the player (including name replacement).
-	public static void staffOGMessage(Player p, String message) {
+	public static void staffOGMessage(CommandSender p, String message) {
 
 		p.sendMessage(legacySerializerAnyCase(format(message)));
 
