@@ -45,7 +45,8 @@ public class SecurityEventListener implements Listener {
 
 		}
 
-		if (! ipInfo.isPanelAcknowledged() && !ipInfo.isInitial()) {
+		// Only challenge a new IP if the users's panel account is already set up.
+		if (! ipInfo.isPanelAcknowledged() && ! ipInfo.isInitial() && sm.isUserAccountCreated(uuid, ip) == true) {
 
 			event.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
 
@@ -55,7 +56,7 @@ public class SecurityEventListener implements Listener {
 
 			// Create a MiniMessage instance.
 			MiniMessage miniMessage = MiniMessage.miniMessage();
-			// Deserialize the string into a TextComponent.å
+			// Deserialize the string into a TextComponent.
 			Component kickMessage = miniMessage.deserialize(messageString);
 
 			event.kickMessage(kickMessage);

@@ -3,6 +3,7 @@ plugins {
     java // Tell gradle this is a java project.
     eclipse // Import eclipse plugin for IDE integration.
     kotlin("jvm") version "2.0.21" // Import kotlin jvm plugin for kotlin/java integration.
+    id("io.freefair.lombok") version "8.13.1" // Automatic lombok support.
 }
 
 java {
@@ -47,8 +48,6 @@ dependencies {
     compileOnly("mysql:mysql-connector-java:8.0.32")
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    compileOnly("org.projectlombok:lombok:1.18.22")
-    annotationProcessor("org.projectlombok:lombok:1.18.22")
     // implementations will be shaded.
     implementation("org.jooq:jooq:3.18.4")
     implementation("org.reactivestreams:reactive-streams:1.0.4")
@@ -65,18 +64,29 @@ fun revertPluginYmlVersion() {
     yaml.writeText(lines.joinToString("\n"))
 }
 
-fun getCurrentGitBranch(): String = try {
-    ProcessBuilder("git", "rev-parse", "--abbrev-ref", "HEAD")
+// Add the name of the current git branch to the build.
+fun currentGitBranch(): String = try {
+    val proc = ProcessBuilder(
+        "git",
+        "-C", rootProject.projectDir.absolutePath,
+        "rev-parse", "--abbrev-ref", "HEAD"
+    )
         .redirectErrorStream(true)
         .start()
-        .inputStream
-        .bufferedReader()
-        .use { it.readText() }
+
+    val out = proc.inputStream.bufferedReader().readText().trim()
+    proc.waitFor()
+
+    // If Git failed or gave us garbage, fall back.
+    val branch = if (proc.exitValue() != 0 || out.startsWith("fatal")) "ogsuite" else out
+
+    // Keep the classifier file-system & URI safe
+    branch
         .lowercase()
-        .trim()
-        .let { if (it == "head") "ogsuite" else it }
+        .replace(Regex("[^a-z0-9._-]"), "_")
+        .ifBlank { "ogsuite" }
 } catch (_: Exception) {
-    "unknown"
+    "ogsuite"
 }
 
 // Update plugin.yml before compilation
@@ -84,7 +94,7 @@ val updatePluginYmlVersion = tasks.register("updatePluginYmlVersion") {
     doLast {
         val yaml = file("src/main/resources/plugin.yml")
         val lines = yaml.readLines().toMutableList()
-        lines[2] = "version: $version-${getCurrentGitBranch()}"
+        lines[2] = "version: $version-${currentGitBranch()}"
         yaml.writeText(lines.joinToString("\n"))
     }
 }
@@ -96,7 +106,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 }
 
 tasks.shadowJar {
-    archiveClassifier.set(getCurrentGitBranch())
+    archiveClassifier.set(currentGitBranch())
     from("LICENSE") { into("/") }
     dependencies {
         include(dependency("org.jooq:jooq"))
