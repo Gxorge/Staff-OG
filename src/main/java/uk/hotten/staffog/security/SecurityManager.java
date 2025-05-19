@@ -5,6 +5,7 @@ import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_STAFFIP;
 import static uk.hotten.staffog.data.jooq.Tables.STAFFOG_WEB;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -62,6 +63,39 @@ public class SecurityManager {
 			error.printStackTrace();
 			return null;
 		}
+	}
+
+	public boolean isUserAccountCreated(UUID id, String ip) {
+
+		try (Connection connection = DatabaseManager.getInstance().createConnection()) {
+
+			DSLContext dsl = DSL.using(connection);
+			StaffogStaffipRecord record = dsl.select(STAFFOG_STAFFIP.asterisk())
+					.from(STAFFOG_STAFFIP)
+					.where(STAFFOG_STAFFIP.UUID.eq(id.toString()))
+					.and(STAFFOG_STAFFIP.IP.eq(ip))
+					.fetchOneInto(STAFFOG_STAFFIP);
+
+			if (record == null) {
+
+				return false;
+
+			}
+			else {
+
+				return record.getPanelVerified();
+
+			}
+
+		}
+		catch (Exception e) {
+
+			e.printStackTrace();
+
+			return false;
+
+		}
+
 	}
 
 	public boolean hasUUIDGotIp(UUID uuid) {
